@@ -1,0 +1,12 @@
+node_modules/
+.superpowers/
+.state/
+.state-evidence-*/
+profiles/
+coverage/
+*.log
+.env
+.env.*
+!.env.example
+docs/superpowers/
+docs/research/

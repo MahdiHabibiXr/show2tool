@@ -1,0 +1,24 @@
+{
+  "name": "show2tool-spike",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:spike": "vitest run test/spike",
+    "demo": "tsx spike/demo.ts",
+    "probe:manual": "tsx spike/manual.ts",
+    "cli": "tsx spike/cli.ts"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.2",
+    "playwright": "1.64.1",
+    "tsx": "4.23.15",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  }
+}
