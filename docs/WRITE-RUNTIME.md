@@ -28,4 +28,8 @@ Deletion, payments, permission changes, bulk mutations, external sending/publica
 4. Synthetic broker integration, concurrent calls, denial/expiry and crash probes.
 5. Live human synthetic confirmation exercise before enabling any nonfixture target.
 
+## Current foundation limits
+
+The internal journal has exclusive file claims, synced file contents, claim-owner-only one-use completion, and interrupted/corrupt state classified unknown. POSIX paths additionally sync directory entries. Windows does not expose the same directory-sync guarantee through this implementation; tests establish process-termination recovery, not power-loss durability. This gap must be resolved or explicitly constrained before enabling a nonfixture mutation transport. The journal is not a tamper-proof audit log against same-user filesystem access.
+
 The public authoring runtime remains read-only until all relevant gates are met. Existing spike write tests are useful references, not an authorization shortcut.
