@@ -34,10 +34,7 @@ export async function handle(input: unknown, registry?: WorkflowRegistry, sessio
       case 'save_chain': return stateDir ? success(await new SavedChains(stateDir).save(command.definition)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'chains': {
         if (!stateDir) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
-        const chains = await new SavedChains(stateDir).list();
-        const offset = command.offset ?? 0;
-        const page = chains.slice(offset, offset + 5);
-        return success({ chains: page, nextOffset: offset + page.length < chains.length ? offset + page.length : null });
+        return success(await new SavedChains(stateDir).page(command.offset ?? 0));
       }
       case 'chain': return stateDir ? success(await new SavedChains(stateDir).load(command.id, command.digest)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'verify_saved_chain': {

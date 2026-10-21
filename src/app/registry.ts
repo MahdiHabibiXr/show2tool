@@ -15,8 +15,8 @@ export class WorkflowRegistry {
     if (manifest.pagination && grant.queryKeys && !grant.queryKeys.includes(manifest.pagination.cursorQuery)) throw new Error('REVIEW_REQUIRED');
     this.tools.set(manifest.id, { manifest: structuredClone(manifest), grant: structuredClone(grant) });
   }
-  list(): { id: string; effect: string; inputs: Manifest['inputs']; manifestDigest: string }[] {
-    return [...this.tools.values()].map(({ manifest }) => ({ id: manifest.id, effect: manifest.effect, inputs: structuredClone(manifest.inputs), manifestDigest: manifestHash(manifest) }));
+  list(): { id: string; effect: string; inputs: Manifest['inputs']; manifestDigest: string; chainSupported: boolean }[] {
+    return [...this.tools.values()].map(({ manifest }) => ({ id: manifest.id, effect: manifest.effect, inputs: structuredClone(manifest.inputs), manifestDigest: manifestHash(manifest), chainSupported: !manifest.pagination }));
   }
   async runChain(inputs: Record<string, string>, steps: import('../contracts/chain.js').ChainSteps): Promise<unknown> {
     const snapshots = steps.map(step => {

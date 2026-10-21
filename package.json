@@ -48,6 +48,7 @@
     "skills/",
     "dist/spike/capture.js",
     "dist/spike/sanitize.js",
-    "docs/AGENT-USAGE.md"
+    "docs/AGENT-USAGE.md",
+    "docs/COMPATIBILITY.md"
   ]
 }

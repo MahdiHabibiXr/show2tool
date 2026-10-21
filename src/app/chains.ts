@@ -35,6 +35,18 @@ export class SavedChains {
       return definition;
     } finally { await file.close(); }
   }
+  async page(offset: number) {
+    let files: string[];
+    try { files = await readdir(this.directory); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return { chains: [], nextOffset: null }; throw error; }
+    const names = files.filter(name => /^([a-z][a-z0-9_]{0,63})-([a-f0-9]{64})\.json$/.test(name)).sort();
+    if (names.length > 1000) throw new Error('BUDGET_EXCEEDED');
+    const chains = [];
+    for (const name of names.slice(offset, offset + 5)) {
+      const match = /^([a-z][a-z0-9_]{0,63})-([a-f0-9]{64})\.json$/.exec(name)!;
+      try { const definition = await this.load(match[1], match[2]); chains.push({ id: definition.id, digest: match[2], inputs: definition.inputs }); } catch {}
+    }
+    return { chains, nextOffset: offset + 5 < names.length ? offset + 5 : null };
+  }
   async list() {
     let files: string[];
     try { files = await readdir(this.directory); } catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return []; throw error; }

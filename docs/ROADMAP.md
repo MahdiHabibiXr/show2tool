@@ -35,8 +35,9 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added explicitly reviewed bounded cursor pagination (up to five pages); cursor scope, repeated-cursor detection and partial-result failure are tested.
 - Added ID-safe reviewed whole-segment path parameters with labelled-demo checks and shared capture/transport scope matching.
 - Removed the hard-coded Windows Chrome attachment path and configured a Windows/Linux CI matrix. Linux success is not claimed before an actual hosted run.
-- Added bounded sequential composition of 1–5 digest-bound reviewed nonpaginated reads with backward-only projected-result dependencies. Persisted named chains, multi-step compilation and chain verification remain open.
+- Added bounded sequential composition of 1–5 digest-bound reviewed nonpaginated reads with backward-only projected-result dependencies. Automatic multi-step compilation remains open; saved chains and verification were added in subsequent increments below.
 - Added shared read-chain deadlines spanning credentials/DNS/HTTP, active-request cancellation and no-late-dispatch checks.
 - Added `verify_chain` reports bound to ordered step definitions and final manifest digests, with scalar independent expected-result assertions.
 - Added reusable versioned chain definitions with typed inputs and explicit digest selection; saving grants no permissions and restart still requires fresh constituent-tool reviews.
+- Added typed named MCP entrypoints for unambiguous saved chains with current constituent reviews; explicit digest calls remain available for multiple versions.
 - Next: release evidence/compatibility cleanup and the separately gated write lifecycle. General-purpose release acceptance is not yet complete.

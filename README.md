@@ -310,7 +310,8 @@ The projects overlap in making software usable by agents. They are not the same 
 - [ ] Finish feasibility gates: live human confirmation and competitor execution
 - [x] Single-request reviewed read contract and CLI/MCP runtime
 - [x] Local read-session broker and versioned saved definitions
-- [ ] Broaden supported contracts beyond single fixed-path requests
+- [x] ID-safe path parameters, bounded cursor pagination and reusable verified read chains
+- [ ] Automatically compile multi-step demonstrations
 - [ ] Add durable cross-process write approval
 - [ ] Export inspectable CLI and MCP packages from the same runtime
 - [ ] Package the authoring skill and test it in a fresh agent session

@@ -23,6 +23,13 @@ it('pages saved chain descriptors within the IPC output budget', async () => {
     const catalog = new SavedChains(dir);
     const inputs = Object.fromEntries(Array.from({ length: 20 }, (_, index) => [`field_${index}_${'x'.repeat(50)}`, { type: 'string', maxLength: 200 }]));
     for (let index = 0; index < 25; index++) await catalog.save({ ...definition, id: `chain_${index}`, inputs });
+    class CountingCatalog extends SavedChains {
+      loads = 0;
+      override async load(id: string, digest: string) { this.loads++; return super.load(id, digest); }
+    }
+    const counting = new CountingCatalog(dir);
+    expect((await counting.page(0)).chains).toHaveLength(5);
+    expect(counting.loads).toBe(5);
     let offset: number | null = 0;
     const ids = new Set<string>();
     while (offset !== null) {
