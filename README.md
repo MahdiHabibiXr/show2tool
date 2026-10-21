@@ -33,14 +33,14 @@ Show2Tool is a local TypeScript CLI and MCP authoring server. The development al
 | | What you get today |
 | :---: | :--- |
 | 🧭 | **Scoped recording** in a dedicated Chrome profile; login happens before capture. |
-| 🧩 | **Input inference** for a single fixed-path request with scalar query/body bindings. |
+| 🧩 | **Input inference** for a single request, scalar query/body bindings and explicit ID-safe path templates. |
 | 🔐 | **Human-reviewed reads** with fixed destinations, scoped cookies and bounded JSON output. |
 | 🛠️ | **CLI + MCP authoring** from shared command schemas and runtime handlers. |
 | 💾 | **Saved definitions** that survive restart; permissions never do. |
 | 🧪 | **Synthetic integration tests** covering capture, execution, review boundaries and recovery. |
 
 > [!IMPORTANT]
-> **Development alpha—not production automation.** External-account compatibility is not established. Start with synthetic data or an authorized sandbox. The new runtime executes GET reads only; write probes live separately in `spike/`. No npm release, portable workflow export or named per-workflow MCP export is available.
+> **Development alpha—not production automation.** External-account compatibility is not established. Start with synthetic data or an authorized sandbox. The new runtime executes GET reads only; write probes live separately in `spike/`. No npm release or portable workflow export is available. Named reviewed-workflow MCP execution is available locally; it still depends on the running human-authorized host.
 
 ## 🤖 Copy this setup prompt to your coding agent
 
@@ -77,7 +77,7 @@ key is needed. Explain unsupported workflows instead of bypassing safeguards.
 
 ## Quick start
 
-**Requirements:** Node.js 24+, npm, and Google Chrome. Windows is the currently exercised platform; one CDP integration test uses Chrome's standard Windows installation path.
+**Requirements:** Node.js 24+, npm, and Google Chrome in a standard installation location. Local validation is on Windows; CI is configured for Windows and Linux, but platform success must be established by actual runs. Use `npm run agent -- doctor` after building for prerequisite diagnostics.
 
 ```sh
 git clone https://github.com/MahdiHabibiXr/show2tool.git

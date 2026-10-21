@@ -6,13 +6,13 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 it('records only approved scope in an owned browser and returns opaque recording identifiers', async () => {
   const server = createServer((req, res) => {
-    if (req.url === '/') { res.setHeader('content-type', 'text/html'); res.end('<button onclick="fetch(\'/catalog?term=alpha\').then(r=>r.json()).then(()=>document.title=\'done\')">Search</button>'); }
+    if (req.url === '/') { res.setHeader('content-type', 'text/html'); res.end('<button onclick="fetch(\'/catalog/a1?term=alpha\').then(r=>r.json()).then(()=>document.title=\'done\')">Search</button>'); }
     else { res.setHeader('content-type', 'application/json'); res.end('{"items":["alpha"]}'); }
   });
   await new Promise<void>(resolve => server.listen(0, '127.0.0.1', resolve));
   const origin = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
   const dir = await mkdtemp(join(tmpdir(), 'show2tool-session-'));
-  const session = await BrowserSession.open(dir, { origin, paths: ['/catalog'], queryKeys: ['term'], bodyKeys: [], cookieNames: [], addresses: ['127.0.0.1'] }, { headless: true });
+  const session = await BrowserSession.open(dir, { origin, paths: ['/catalog/{itemId}'], queryKeys: ['term'], bodyKeys: [], cookieNames: [], addresses: ['127.0.0.1'] }, { headless: true });
   try {
     await session.start({ search: 'alpha' });
     // Drive only our controlled test page; product code never clicks to demonstrate.

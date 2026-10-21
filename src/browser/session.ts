@@ -2,6 +2,7 @@ import { chromium, type BrowserContext, type Page } from 'playwright';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
 import { z } from 'zod';
+import { pathSchema } from '../contracts/paths.js';
 import { startCapture, type Capture, type Observation } from '../../spike/capture.js';
 import { inspectRecording } from '../../spike/inspect.js';
 import { assertDestination } from '../runtime/policy.js';
@@ -9,7 +10,7 @@ import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 export const scopeSchema = z.object({
   origin: z.string().url().refine(value => new URL(value).origin === value && ['https:', 'http:'].includes(new URL(value).protocol)),
-  paths: z.array(z.string().regex(/^\/[a-zA-Z0-9_\-/]*$/).max(1024)).min(1).max(20),
+  paths: z.array(pathSchema).min(1).max(20),
   queryKeys: z.array(z.string()).max(20), bodyKeys: z.array(z.string()).max(20), cookieNames: z.array(z.string().regex(/^[a-zA-Z0-9_-]{1,64}$/)).max(20),
   addresses: z.array(z.string().refine(value => isIP(value) !== 0)).max(20).optional(),
 }).strict();

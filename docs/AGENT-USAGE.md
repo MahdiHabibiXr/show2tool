@@ -71,7 +71,7 @@ Repeat for a second differing input. IDs and retained evidence are in-memory and
 
 Prefer `compile_recordings` through CLI or MCP. Its schema is discoverable with `schema`: provide two `ids` (recording UUIDs), matching `requestIds` (such as `request:0`), and a `specification` with tool ID, fixed origin/method/path, effect, typed string inputs and JSON-pointer output projections. The broker reads its owned evidence directly. Offline `candidate` accepts explicit demonstrations for development but does not establish their provenance or grant execution permission.
 
-The current compiler supports a **single fixed-path request**, scalar query/body bindings and constants. It does not yet compile multi-step dependencies or infer path templates. Only complete, consistent examples are accepted. The resulting bindings actually construct outgoing requests; the compiler does not execute them.
+The current compiler supports a **single fixed-path request**, scalar query/body bindings and constants. It does not yet compile multi-step dependencies. Explicit reviewed path templates are supported as described below; templates are not guessed from arbitrary traffic. Only complete, consistent examples are accepted. The resulting bindings actually construct outgoing requests; the compiler does not execute them.
 
 Save the complete successful compiler result to a UTF-8 JSON file; no manual extraction of `data` is needed. For example, after writing a `compile_recordings` command into `compile.json`:
 
@@ -127,6 +127,12 @@ Use command files containing:
 ```
 
 The runtime resolves scoped cookies inside the host, blocks redirects/unreviewed destinations, performs a bounded JSON GET and returns only projected fields. Use `verify` below to check independently specified expected facts; execution success alone does not establish correctness. The current schema can describe create/update candidates, but registration and execution of those actions are disabled.
+
+## Reviewed path parameters
+
+For detail reads, a specification and human scope can use a whole-segment placeholder such as `/api/tasks/{taskId}`. Declare `taskId` as a string input and demonstrate two different labelled IDs whose captured paths match exactly. The compiler treats the changing path segment as an input; it rejects unrelated or unchanged evidence. The manifest path must be contained by a scope path: a template scope can authorize a narrower fixed path, but a fixed scope never authorizes a broader template.
+
+Path values accept only nonempty ASCII letters, digits, underscore and hyphen (up to the input's reviewed length). Slashes, percent escapes, dot segments, query delimiters and URLs are rejected rather than normalized. A template matches exactly one segment, not nested paths. Capture, materialization and replay destination checks use the same segment rule. This deliberately excludes IDs containing spaces or other punctuation; unsupported values are not a reason to widen scope.
 
 ## Optional bounded cursor pagination
 

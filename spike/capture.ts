@@ -1,5 +1,6 @@
 import type { Page } from 'playwright';
 import { summarize } from './sanitize.js';
+import { matchesPath } from '../src/contracts/paths.js';
 export type Observation = { id: string; method: string; path: string; queryKeys: string[]; status: number; shape: unknown; approvedQuery?: Record<string, string>; approvedBody?: Record<string, string | number | boolean | null>; requestOmittedReason?: string; omittedReason?: string };
 export type Capture = { stop(): Promise<Observation[]> };
 async function bounded(work: Promise<unknown>, ms: number): Promise<void> {
@@ -30,7 +31,7 @@ export async function startCapture(page: Page, scope: { origin: string; paths: s
   const onRequest = (event: {frameId?:string;requestId:string;request:{url:string;method:string;postData?:string;hasPostData?:boolean}}) => {
     if (stopping || departed || event.frameId !== frameId) return;
     const url = new URL(event.request.url);
-    if (url.origin !== scope.origin || !scope.paths.includes(url.pathname)) return;
+    if (url.origin !== scope.origin || !scope.paths.some(path => matchesPath(path, url.pathname))) return;
     if (rows.length >= scope.maxRequests) { rows[rows.length - 1].requestOmittedReason = 'request-count-budget'; return; }
     const row: Observation = { id: `request:${rows.length}`, method: event.request.method, path: url.pathname,
       queryKeys: [...url.searchParams.keys()].filter(k => /^[a-zA-Z][a-zA-Z0-9_]{0,63}$/.test(k)).slice(0, 20), status: 0, shape: null };
@@ -68,7 +69,7 @@ export async function startCapture(page: Page, scope: { origin: string; paths: s
     const row = tracked.get(event.requestId);
     if (!row) return;
     const url = new URL(event.response.url);
-    if (url.origin !== scope.origin || !scope.paths.includes(url.pathname)) { row.omittedReason = 'out-of-scope'; return; }
+    if (url.origin !== scope.origin || !scope.paths.some(path => matchesPath(path, url.pathname))) { row.omittedReason = 'out-of-scope'; return; }
     row.status = event.response.status;
     if (!event.response.mimeType.includes('json')) row.omittedReason = 'not-json';
   };

@@ -1,4 +1,5 @@
 import ipaddr from 'ipaddr.js';
+import { matchesPath } from '../contracts/paths.js';
 export type DestinationGrant = { origin: string; addresses?: string[]; paths?: string[]; queryKeys?: string[]; bodyKeys?: string[] };
 export function isPublicAddress(address: string): boolean {
   try {
@@ -9,7 +10,7 @@ export function isPublicAddress(address: string): boolean {
 }
 export function assertDestination(url: URL, addresses: string[], grant: DestinationGrant): void {
   if (url.origin !== grant.origin || !['https:', 'http:'].includes(url.protocol) || url.username || url.password || !addresses.length) throw new Error('REVIEW_REQUIRED');
-  if (grant.paths && !grant.paths.includes(url.pathname)) throw new Error('REVIEW_REQUIRED');
+  if (grant.paths && !grant.paths.some(path => matchesPath(path, url.pathname))) throw new Error('REVIEW_REQUIRED');
   if (addresses.some(address => !isPublicAddress(address) && !grant.addresses?.includes(address))) throw new Error('REVIEW_REQUIRED');
   if (grant.addresses && addresses.some(address => !grant.addresses!.includes(address))) throw new Error('REVIEW_REQUIRED');
 }

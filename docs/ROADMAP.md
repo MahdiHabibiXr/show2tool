@@ -33,4 +33,6 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added named reviewed MCP workflow mode with actual input schemas and manifest-digest binding. Reconnect to discover new contracts; changed stale calls fail closed.
 - Added runnable read-only synthetic sandbox and command-file walkthrough; agent-driven UI login/search smoke returned the seeded gamma record. A complete live-human authorization walkthrough is still pending.
 - Added explicitly reviewed bounded cursor pagination (up to five pages); cursor scope, repeated-cursor detection and partial-result failure are tested.
-- Next: safe reviewed path parameters and bounded read dependencies; then the separately gated write lifecycle.
+- Added ID-safe reviewed whole-segment path parameters with labelled-demo checks and shared capture/transport scope matching.
+- Removed the hard-coded Windows Chrome attachment path and configured a Windows/Linux CI matrix. Linux success is not claimed before an actual hosted run.
+- Next: bounded sequential read dependencies, then the separately gated write lifecycle.

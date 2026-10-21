@@ -78,7 +78,10 @@ it('attaches through CDP to an owned dedicated Chrome instance', async () => {
   const { readFile } = await import('node:fs/promises');
   const app = await startFixture();
   const profile = await mkdtemp(join(tmpdir(), 'show2tool-cdp-'));
-  const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', `--user-data-dir=${profile}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
+  const { findChrome } = await import('../../src/browser/chrome.js');
+  const executable = await findChrome();
+  if (!executable) throw new Error('Install Google Chrome in its standard location before running browser tests.');
+  const chrome = spawn(executable, ['--headless=new', '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', `--user-data-dir=${profile}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
   let attached: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
   try {
     let port = '';

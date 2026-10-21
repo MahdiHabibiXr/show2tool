@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { pathInputs, resolvePath } from '../contracts/paths.js';
 import { manifestSchema, specificationSchema, type Manifest } from '../contracts/manifest.js';
 const scalarFields = z.record(z.string(), z.string().max(200));
 const demoSchema = z.object({ inputs: scalarFields, request: z.object({ id: z.string().max(100), method: z.string(), path: z.string(), status: z.number(), shape: z.unknown(), queryKeys: z.array(z.string()), approvedQuery: scalarFields.optional(), approvedBody: scalarFields.optional(), omittedReason: z.string().optional(), requestOmittedReason: z.string().optional() }).strict() }).strict();
@@ -7,7 +8,7 @@ export function compileTool(demonstrations: unknown, specification: unknown): Ma
   const demos = z.array(demoSchema).min(2).max(10).parse(demonstrations);
   for (const demo of demos) {
     if (demo.request.omittedReason || demo.request.requestOmittedReason || demo.request.shape == null || demo.request.status < 200 || demo.request.status >= 300) throw new Error('INCOMPLETE_EVIDENCE');
-    if (demo.request.method !== spec.method || demo.request.path !== spec.path) throw new Error('INVALID_INPUT');
+    if (demo.request.method !== spec.method || demo.request.path !== resolvePath(spec.path, demo.inputs)) throw new Error('INVALID_INPUT');
     if (demo.request.queryKeys.some(key => !Object.hasOwn(demo.request.approvedQuery ?? {}, key))) throw new Error('INCOMPLETE_EVIDENCE');
   }
   const bind = (kind: 'approvedQuery' | 'approvedBody'): Manifest['query'] => {
@@ -26,7 +27,9 @@ export function compileTool(demonstrations: unknown, specification: unknown): Ma
   };
   const query = bind('approvedQuery');
   const body = bind('approvedBody');
-  const used = new Set([...Object.values(query), ...Object.values(body)].flatMap(binding => binding.source === 'input' ? [binding.name] : []));
+  const parameters = pathInputs(spec.path);
+  if (parameters.some(name => !Object.hasOwn(spec.inputs, name) || new Set(demos.map(demo => demo.inputs[name])).size < 2)) throw new Error('AMBIGUOUS_BINDING');
+  const used = new Set([...parameters, ...[...Object.values(query), ...Object.values(body)].flatMap(binding => binding.source === 'input' ? [binding.name] : [])]);
   if (Object.keys(spec.inputs).some(name => !used.has(name))) throw new Error('AMBIGUOUS_BINDING');
   return manifestSchema.parse({ ...spec, schemaVersion: 1, query, body, provenance: demos.map(demo => demo.request.id) });
 }
@@ -41,7 +44,7 @@ export function materialize(manifest: Manifest, inputs: unknown): { method: stri
     if (!Object.hasOwn(checked.data, binding.name)) throw new Error('INVALID_INPUT');
     return checked.data[binding.name];
   };
-  const url = new URL(contract.path, contract.origin);
+  const url = new URL(resolvePath(contract.path, checked.data), contract.origin);
   for (const [key, value] of Object.entries(contract.query)) url.searchParams.set(key, resolve(value));
   const body = Object.fromEntries(Object.entries(contract.body).map(([key, value]) => [key, resolve(value)]));
   if (contract.method === 'GET' && Object.keys(body).length) throw new Error('INVALID_INPUT');
