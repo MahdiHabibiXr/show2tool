@@ -22,7 +22,7 @@ async function main(): Promise<Result> {
     if (Buffer.byteLength(args[0]) > 1024 * 1024) return failure('BUDGET_EXCEEDED', 'Input exceeds the 1 MiB limit.');
     try {
       const input = JSON.parse(args[0]);
-      if (['compile_recordings', 'record_start', 'record_stop', 'recording', 'tools', 'run', 'verify'].includes(input.command)) {
+      if (['compile_recordings', 'record_start', 'record_stop', 'recording', 'tools', 'run', 'run_chain', 'verify'].includes(input.command)) {
         const { callBroker } = await import('./broker/server.js');
         const { defaultStateDir } = await import('./browser/host.js');
         return callBroker(defaultStateDir(), input);

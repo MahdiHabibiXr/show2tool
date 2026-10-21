@@ -12,7 +12,7 @@ function atPointer(data: unknown, pointer: string): unknown {
   }
   return value;
 }
-export async function executeRead(candidate: unknown, inputs: unknown, grant: DestinationGrant, headers: Record<string, string> = {}): Promise<Record<string, unknown>> {
+export async function executeRead(candidate: unknown, inputs: unknown, grant: DestinationGrant, headers: Record<string, string> = {}, signal: AbortSignal = AbortSignal.timeout(60000)): Promise<Record<string, unknown>> {
   const manifest = manifestSchema.parse(candidate);
   if (manifest.effect !== 'read' || manifest.method !== 'GET') throw new Error('UNSUPPORTED_FEATURE');
   const request = materialize(manifest, inputs);
@@ -25,7 +25,7 @@ export async function executeRead(candidate: unknown, inputs: unknown, grant: De
   const started = Date.now();
   for (let page = 0; page < (paging?.maxPages ?? 1); page++) {
     if (Date.now() - started >= 60000) throw new Error('BUDGET_EXCEEDED');
-    data = await requestJson(url, grant, headers);
+    data = await requestJson(url, grant, headers, signal);
     if (!paging) break;
     const batch = atPointer(data, paging.itemsPointer);
     if (!Array.isArray(batch)) throw new Error('CONTRACT_MISMATCH');

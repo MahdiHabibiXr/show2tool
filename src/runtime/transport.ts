@@ -4,15 +4,18 @@ import { lookup } from 'node:dns/promises';
 import { isIP } from 'node:net';
 import { createGunzip, createInflate, createBrotliDecompress } from 'node:zlib';
 import { assertDestination, type DestinationGrant } from './policy.js';
+import { withinDeadline } from './deadline.js';
 
-export async function requestJson(url: URL, grant: DestinationGrant, headers: Record<string, string> = {}): Promise<unknown> {
+export async function requestJson(url: URL, grant: DestinationGrant, headers: Record<string, string> = {}, signal?: AbortSignal): Promise<unknown> {
   const hostname = url.hostname.replace(/^\[|\]$/g, '');
-  const resolved = isIP(hostname) ? [{ address: hostname, family: isIP(hostname) }] : await lookup(hostname, { all: true });
+  const resolved = isIP(hostname) ? [{ address: hostname, family: isIP(hostname) }] : await withinDeadline(lookup(hostname, { all: true }), signal);
+  if (signal?.aborted) throw new Error('BUDGET_EXCEEDED');
   assertDestination(url, resolved.map(item => item.address), grant);
   const selected = resolved[0];
   return new Promise((accept, reject) => {
     let settled = false;
-    const fail = (code: string) => { if (!settled) { settled = true; clearTimeout(timer); req.destroy(); reject(new Error(code)); } };
+    const abort = () => fail('BUDGET_EXCEEDED');
+    const fail = (code: string) => { if (!settled) { settled = true; clearTimeout(timer); signal?.removeEventListener('abort', abort); req.destroy(); reject(new Error(code)); } };
     const req = (url.protocol === 'https:' ? httpsRequest : httpRequest)(url, {
       method: 'GET', agent: false, headers: { ...headers, accept: 'application/json', 'accept-encoding': 'gzip, deflate, br' },
       lookup: ((_hostname: string, options: { all?: boolean }, callback: (...args: unknown[]) => void) => {
@@ -50,12 +53,14 @@ export async function requestJson(url: URL, grant: DestinationGrant, headers: Re
             if (item.depth > 32) { fail('BUDGET_EXCEEDED'); return; }
             if (item.value && typeof item.value === 'object') for (const child of Object.values(item.value)) stack.push({ value: child, depth: item.depth + 1 });
           }
-          settled = true; clearTimeout(timer); accept(value);
+          settled = true; clearTimeout(timer); signal?.removeEventListener('abort', abort); accept(value);
         } catch { fail('INVALID_RESPONSE'); }
       });
     });
     const timer = setTimeout(() => fail('UPSTREAM_TIMEOUT'), 10000);
     req.on('error', () => fail('UPSTREAM_FAILED'));
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) { abort(); return; }
     req.end();
   });
 }

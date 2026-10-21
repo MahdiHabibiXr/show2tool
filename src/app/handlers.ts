@@ -30,6 +30,7 @@ export async function handle(input: unknown, registry?: WorkflowRegistry, sessio
         return success({ tools: page, nextOffset: command.offset + page.length < tools.length ? command.offset + page.length : null });
       }
       case 'run': return registry ? success(await registry.run(command.id, command.inputs, command.manifestDigest)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+      case 'run_chain': return registry ? success(await registry.runChain(command.inputs, command.steps)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'verify': return registry && stateDir ? success(await registry.verify(command.id, command.inputs, command.expected, stateDir)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'candidate': return success(compileTool(command.demonstrations, command.specification));
       case 'commands': return success({ commands: discovery });

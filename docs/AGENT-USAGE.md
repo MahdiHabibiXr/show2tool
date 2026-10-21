@@ -128,6 +128,33 @@ Use command files containing:
 
 The runtime resolves scoped cookies inside the host, blocks redirects/unreviewed destinations, performs a bounded JSON GET and returns only projected fields. Use `verify` below to check independently specified expected facts; execution success alone does not establish correctness. The current schema can describe create/update candidates, but registration and execution of those actions are disabled.
 
+## Bounded sequential read dependencies
+
+`run_chain` composes 1–5 tools already reviewed in the current host. Use the manifest digests returned by `tools`; every step is checked before the first request and again at execution. Only the final projected result is returned.
+
+```json
+{
+  "command": "run_chain",
+  "inputs": { "query": "gamma" },
+  "steps": [
+    {
+      "id": "search_tasks",
+      "manifestDigest": "REPLACE_WITH_SEARCH_DIGEST",
+      "inputs": { "search": { "source": "input", "name": "query" } }
+    },
+    {
+      "id": "task_detail",
+      "manifestDigest": "REPLACE_WITH_DETAIL_DIGEST",
+      "inputs": { "taskId": { "source": "step", "step": 0, "projection": "/items", "pointer": "/0/id" } }
+    }
+  ]
+}
+```
+
+Digests must be full 64-character hashes; placeholders above are not executable. Bindings can reference a top-level string input, a literal string, or a prior step's explicitly projected field plus a relative JSON Pointer. Resolved values must be strings up to 200 characters and satisfy the destination tool's own input constraints. No forward/self references, arbitrary fetches, response-driven destinations or writes are accepted. These are compositions of existing read permissions, not new approvals.
+
+Current chain mode excludes paginated tools and enforces one shared 50-second deadline across credentials, DNS and HTTP, within the broker response window. Expiry cancels active HTTP and prevents later dispatch. Browser/DNS operations that cannot be canceled may finish internally, but their late results cannot initiate a request. Multi-step compilation, persisted named chain definitions and chain verification reports are not yet implemented; compare final facts independently. A failed later step stops execution; preceding reads are not retried automatically.
+
 ## Reviewed path parameters
 
 For detail reads, a specification and human scope can use a whole-segment placeholder such as `/api/tasks/{taskId}`. Declare `taskId` as a string input and demonstrate two different labelled IDs whose captured paths match exactly. The compiler treats the changing path segment as an input; it rejects unrelated or unchanged evidence. The manifest path must be contained by a scope path: a template scope can authorize a narrower fixed path, but a fixed scope never authorizes a broader template.
