@@ -222,6 +222,10 @@ HTTP 200 and a valid JSON shape are not enough: the tests also check the selecte
 | Local read-session broker and authoring skill | **Implemented for the development alpha** |
 | Human-reviewed CLI/MCP GET runtime | **Implemented**, shared command handlers |
 | Versioned saved definitions + fresh review after restart | **Implemented**, no persisted execution grants |
+| Typed named MCP tools and saved read chains | **Implemented**, current reviews and digest pins required |
+| ID-safe path inputs and bounded cursor pagination | **Implemented**, explicit human scope |
+| Scalar verification for individual reads and chains | **Implemented**, independent expectations required |
+| Clean production install and CLI/MCP smoke | **Exercised locally**, hosted CI evidence pending |
 | Durable write-confirmation broker | **Planned** |
 
 ## Safety model
