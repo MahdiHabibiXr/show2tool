@@ -42,4 +42,5 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added typed named MCP entrypoints for unambiguous saved chains with current constituent reviews; explicit digest calls remain available for multiple versions.
 - Added definition-only read bundle export/import; transferred manifests remain inactive until recipient scope authorization and review. No credentials or grants are portable.
 - Recorded a separate fresh-agent source-checkout exercise on the same Windows host; hosted CI and live-human authoring remain unproven.
-- Next: release evidence/compatibility cleanup and the separately gated write lifecycle. General-purpose release acceptance is not yet complete.
+- Added an internal, disconnected pending-mutation intent foundation: expiring memory-only payloads, exact terminal phrase, denial/expiry cleanup and synchronous one-use consumption. Public mutation execution is still disabled; see WRITE-RUNTIME.md for remaining gates.
+- Next: reviewed principal/precondition/read-back contracts and durable dispatch recovery, plus live-human/hosted compatibility evidence. General-purpose release acceptance is not yet complete.
