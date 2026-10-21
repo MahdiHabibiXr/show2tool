@@ -36,7 +36,9 @@ Show2Tool is a local TypeScript CLI and MCP authoring server. The development al
 | 🧩 | **Input inference** for a single request, scalar query/body bindings and explicit ID-safe path templates. |
 | 🔐 | **Human-reviewed reads** with fixed destinations, scoped cookies and bounded JSON output. |
 | 🛠️ | **CLI + MCP authoring** from shared command schemas and runtime handlers. |
-| 💾 | **Saved definitions** that survive restart; permissions never do. |
+| 💾 | **Saved tools and read chains** that survive restart; permissions never do. |
+| 🔗 | **Bounded read composition** with projected-result dependencies and digest-bound verification. |
+| 📚 | **Explicit cursor pagination** with page, result and output limits. |
 | 🧪 | **Synthetic integration tests** covering capture, execution, review boundaries and recovery. |
 
 > [!IMPORTANT]
@@ -73,7 +75,7 @@ without my permission and independent expected results. No extra model API
 key is needed. Explain unsupported workflows instead of bypassing safeguards.
 ```
 
-**Want the shortest path first?** Run the synthetic demo below. For browser authoring and MCP setup, follow [the agent usage guide](docs/AGENT-USAGE.md). Translated READMEs currently describe the earlier feasibility milestone; this English guide reflects the read-tool alpha.
+**Want the shortest path first?** Run the synthetic demo below. For a complete hands-on local authoring exercise, follow [the read-only sandbox walkthrough](docs/SANDBOX.md). For browser authoring and MCP setup, follow [the agent usage guide](docs/AGENT-USAGE.md). Translated READMEs currently describe the earlier feasibility milestone; this English guide reflects the read-tool alpha.
 
 ## Quick start
 

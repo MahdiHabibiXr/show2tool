@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { specificationSchema } from './manifest.js';
-import { chainStepsSchema } from './chain.js';
+import { chainDefinitionSchema, chainStepsSchema } from './chain.js';
 import { expectationsSchema } from '../runtime/verify.js';
 const fields = z.record(z.string().regex(/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/), z.string().max(200)).refine(value => Object.keys(value).length <= 20);
 export const commandSchema = z.discriminatedUnion('command', [
@@ -12,6 +12,11 @@ export const commandSchema = z.discriminatedUnion('command', [
   z.object({ command: z.literal('compile_recordings'), ids: z.array(z.string().uuid()).min(2).max(10), requestIds: z.array(z.string().max(100)).min(2).max(10), specification: specificationSchema }).strict(),
   z.object({ command: z.literal('recording'), id: z.string().uuid() }).strict(),
   z.object({ command: z.literal('run'), id: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/), inputs: fields, manifestDigest: z.string().regex(/^[a-f0-9]{64}$/).optional() }).strict(),
+  z.object({ command: z.literal('save_chain'), definition: chainDefinitionSchema }).strict(),
+  z.object({ command: z.literal('chains'), offset: z.number().int().min(0).max(100000).optional() }).strict(),
+  z.object({ command: z.literal('chain'), id: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/), digest: z.string().regex(/^[a-f0-9]{64}$/) }).strict(),
+  z.object({ command: z.literal('verify_saved_chain'), id: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/), digest: z.string().regex(/^[a-f0-9]{64}$/), inputs: fields, expected: expectationsSchema }).strict(),
+  z.object({ command: z.literal('run_saved_chain'), id: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/), digest: z.string().regex(/^[a-f0-9]{64}$/), inputs: fields }).strict(),
   z.object({ command: z.literal('verify_chain'), inputs: fields, steps: chainStepsSchema, expected: expectationsSchema }).strict(),
   z.object({ command: z.literal('run_chain'), inputs: fields, steps: chainStepsSchema }).strict(),
   z.object({ command: z.literal('verify'), id: z.string().regex(/^[a-z][a-z0-9_]{0,63}$/), inputs: fields, expected: expectationsSchema }).strict(),
@@ -22,6 +27,11 @@ export const commandSchema = z.discriminatedUnion('command', [
 ]);
 export type Command = z.infer<typeof commandSchema>;
 export const discovery = [
+  { name: 'save_chain', description: 'Save a versioned chain definition locally without granting execution permission.', effects: 'local-definition-write' },
+  { name: 'chain', description: 'Read one digest-checked saved chain definition, including its reviewed-tool pins and bindings.', effects: 'none' },
+  { name: 'verify_saved_chain', description: 'Verify independent final facts of a saved chain under current constituent-tool reviews.', effects: 'reviewed-read-and-local-evidence' },
+  { name: 'chains', description: 'List saved chain definitions, not execution permissions.', effects: 'none' },
+  { name: 'run_saved_chain', description: 'Run a saved chain with typed inputs; every constituent read still requires current human review.', effects: 'reviewed-read' },
   { name: 'doctor', description: 'Check Node and standard Chrome installation paths without opening a browser or returning local paths.', effects: 'none' },
   { name: 'compile_recordings', description: 'Compile selected broker-owned recording request IDs into an executable candidate.', effects: 'none' },
   { name: 'record_start', description: 'Begin passive recording in a human-scoped dedicated Chrome session.', effects: 'capture' },

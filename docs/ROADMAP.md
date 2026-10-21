@@ -38,4 +38,5 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added bounded sequential composition of 1–5 digest-bound reviewed nonpaginated reads with backward-only projected-result dependencies. Persisted named chains, multi-step compilation and chain verification remain open.
 - Added shared read-chain deadlines spanning credentials/DNS/HTTP, active-request cancellation and no-late-dispatch checks.
 - Added `verify_chain` reports bound to ordered step definitions and final manifest digests, with scalar independent expected-result assertions.
-- Next: persisted chain authoring ergonomics, then the separately gated write lifecycle. General-purpose release acceptance is not yet complete.
+- Added reusable versioned chain definitions with typed inputs and explicit digest selection; saving grants no permissions and restart still requires fresh constituent-tool reviews.
+- Next: release evidence/compatibility cleanup and the separately gated write lifecycle. General-purpose release acceptance is not yet complete.

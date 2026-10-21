@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { SavedChains } from './chains.js';
 import type { BrowserSession } from '../browser/session.js';
 import type { WorkflowRegistry } from './registry.js';
 import { compileTool } from '../workflow/candidate.js';
@@ -30,6 +31,27 @@ export async function handle(input: unknown, registry?: WorkflowRegistry, sessio
         return success({ tools: page, nextOffset: command.offset + page.length < tools.length ? command.offset + page.length : null });
       }
       case 'run': return registry ? success(await registry.run(command.id, command.inputs, command.manifestDigest)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+      case 'save_chain': return stateDir ? success(await new SavedChains(stateDir).save(command.definition)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+      case 'chains': {
+        if (!stateDir) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+        const chains = await new SavedChains(stateDir).list();
+        const offset = command.offset ?? 0;
+        const page = chains.slice(offset, offset + 5);
+        return success({ chains: page, nextOffset: offset + page.length < chains.length ? offset + page.length : null });
+      }
+      case 'chain': return stateDir ? success(await new SavedChains(stateDir).load(command.id, command.digest)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+      case 'verify_saved_chain': {
+        if (!registry || !stateDir) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+        const catalog = new SavedChains(stateDir);
+        const definition = await catalog.load(command.id, command.digest);
+        return success(await registry.verifyChain(catalog.inputs(definition, command.inputs), definition.steps, command.expected, stateDir));
+      }
+      case 'run_saved_chain': {
+        if (!registry || !stateDir) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+        const catalog = new SavedChains(stateDir);
+        const definition = await catalog.load(command.id, command.digest);
+        return success(await registry.runChain(catalog.inputs(definition, command.inputs), definition.steps));
+      }
       case 'verify_chain': return registry && stateDir ? success(await registry.verifyChain(command.inputs, command.steps, command.expected, stateDir)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'run_chain': return registry ? success(await registry.runChain(command.inputs, command.steps)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'verify': return registry && stateDir ? success(await registry.verify(command.id, command.inputs, command.expected, stateDir)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');

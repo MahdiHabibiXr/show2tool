@@ -153,7 +153,19 @@ The runtime resolves scoped cookies inside the host, blocks redirects/unreviewed
 
 Digests must be full 64-character hashes; placeholders above are not executable. Bindings can reference a top-level string input, a literal string, or a prior step's explicitly projected field plus a relative JSON Pointer. Resolved values must be strings up to 200 characters and satisfy the destination tool's own input constraints. No forward/self references, arbitrary fetches, response-driven destinations or writes are accepted. These are compositions of existing read permissions, not new approvals.
 
-Current chain mode excludes paginated tools and enforces one shared 50-second deadline across credentials, DNS and HTTP, within the broker response window. Expiry cancels active HTTP and prevents later dispatch. Browser/DNS operations that cannot be canceled may finish internally, but their late results cannot initiate a request. Multi-step compilation and persisted named chain definitions are not yet implemented. Use `verify_chain` with the same `inputs` and `steps` plus `expected` to check independent final facts. Saved reports include a `chainDigest` covering the complete ordered steps, digest pins and bindings, plus the final manifest digest. Check `data.status`, not just `ok`. Raw step literals are not stored; fingerprints are not encryption. A failed later step stops execution; preceding reads are not retried automatically.
+Current chain mode excludes paginated tools and enforces one shared 50-second deadline across credentials, DNS and HTTP, within the broker response window. Expiry cancels active HTTP and prevents later dispatch. Browser/DNS operations that cannot be canceled may finish internally, but their late results cannot initiate a request. Multi-step compilation and named MCP chain export are not yet implemented. Reusable local chain definitions are supported below. Use `verify_chain` with the same `inputs` and `steps` plus `expected` to check independent final facts. Saved reports include a `chainDigest` covering the complete ordered steps, digest pins and bindings, plus the final manifest digest. Check `data.status`, not just `ok`. Raw step literals are not stored; fingerprints are not encryption. A failed later step stops execution; preceding reads are not retried automatically.
+
+### Save a reusable chain
+
+Send `save_chain` with a `definition` containing `schemaVersion: 1`, a lowercase `id`, typed string `inputs` (same `{ "type": "string", "maxLength": 100 }` shape as tools) and the `steps` above. Top-level input references must be declared. The host stores an immutable definition under `~/.show2tool/chains/` and returns `id`, `digest` and `permissionGranted: false`.
+
+Use `{"command":"chains","offset":0}` to list saved IDs/digests/input rules, five at a time; follow `nextOffset` until null. Inspect exact pins, literals and bindings with `{"command":"chain","id":"find_task_detail","digest":"FULL_DIGEST"}`. Run one with:
+
+```json
+{"command":"run_saved_chain","id":"find_task_detail","digest":"REPLACE_WITH_FULL_DEFINITION_DIGEST","inputs":{"query":"gamma"}}
+```
+
+Use `verify_saved_chain` with the same ID/digest/inputs and an `expected` object to verify the final independent facts without resupplying steps. The digest is mandatory; changed definitions create separate versions. A host restart keeps definitions but every step's underlying tool must be loaded/reviewed again with the same pinned manifest digest. Saved chain definitions can contain literal values—keep the directory private. Saving performs no application requests and grants no execution rights. Chain definitions are not portable standalone packages or signed attestations.
 
 ## Reviewed path parameters
 

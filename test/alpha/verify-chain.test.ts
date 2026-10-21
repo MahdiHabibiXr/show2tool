@@ -21,6 +21,11 @@ it('verifies final chain facts and binds evidence to the complete step definitio
     expect(first).toMatchObject({ ok: true, data: { status: 'passed', chainDigest: expect.stringMatching(/^[a-f0-9]{64}$/), manifestDigest: manifestHash(manifest) } });
     const changed = await handle({ command: 'verify_chain', inputs: { task: 'a3' }, steps: [{ ...steps[0], inputs: { id: { source: 'literal', value: 'a3' } } }], expected: { '/id': 'wrong' } }, registry, undefined, dir);
     expect(changed).toMatchObject({ ok: true, data: { status: 'failed' } });
+    const saved = await handle({ command: 'save_chain', definition: { schemaVersion: 1, id: 'saved_detail', inputs: { task: { type: 'string', maxLength: 20 } }, steps } }, registry, undefined, dir);
+    if (!saved.ok) throw new Error('save failed');
+    const digest = (saved.data as { digest: string }).digest;
+    expect(await handle({ command: 'run_saved_chain', id: 'saved_detail', digest, inputs: { task: 'a3' } }, registry, undefined, dir)).toMatchObject({ ok: true, data: { '/id': 'a3' } });
+    expect(await handle({ command: 'verify_saved_chain', id: 'saved_detail', digest, inputs: { task: 'a3' }, expected: { '/id': 'a3' } }, registry, undefined, dir)).toMatchObject({ ok: true, data: { status: 'passed' } });
     const reports = await Promise.all((await readdir(join(dir, 'verification'))).map(async name => JSON.parse(await readFile(join(dir, 'verification', name), 'utf8'))));
     expect(new Set(reports.map(report => report.chainDigest)).size).toBe(2);
     expect(JSON.stringify(reports)).not.toContain('"task":"a3"');
