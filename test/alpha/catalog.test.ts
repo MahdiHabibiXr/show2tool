@@ -24,7 +24,7 @@ it('retains a saved definition across restart but not its execution permission',
     await expect(registry.run('catalog', {})).rejects.toThrow('REVIEW_REQUIRED');
     expect(await reviews.review(loaded, { interactive: true, ask: async () => 'review catalog' })).toBe(true);
     registry.register(loaded, { origin: manifest.origin });
-    expect(registry.list()).toEqual([{ id: 'catalog', effect: 'read', inputs: {} }]);
+    expect(registry.list()).toEqual([{ id: 'catalog', effect: 'read', inputs: {}, manifestDigest: saved.digest }]);
     const files = await readdir(join(dir, 'tools'));
     expect(files).toHaveLength(1);
     expect(JSON.parse(await readFile(join(dir, 'tools', files[0]), 'utf8'))).toEqual(manifest);

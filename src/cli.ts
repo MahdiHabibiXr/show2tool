@@ -35,6 +35,9 @@ async function main(): Promise<Result> {
 if (process.argv[2] === 'host' && process.argv.length === 4) {
   const { host } = await import('./browser/host.js');
   await host(process.argv[3]);
+} else if (process.argv.slice(2).join(' ') === 'serve --stdio --reviewed') {
+  try { await (await import('./mcp/reviewed.js')).serveReviewed(); }
+  catch { console.error('Reviewed MCP could not start. Start the host, review tools, then reconnect.'); process.exitCode = 4; }
 } else if (process.argv.slice(2).join(' ') === 'serve --stdio') {
   const { serve } = await import('./mcp/authoring.js');
   await serve();

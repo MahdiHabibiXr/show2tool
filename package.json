@@ -16,7 +16,8 @@
     "build": "tsc -p tsconfig.build.json",
     "pretest": "npm run build",
     "agent": "node dist/src/cli.js",
-    "test:install": "node scripts/smoke-install.mjs"
+    "test:install": "node scripts/smoke-install.mjs",
+    "sandbox": "tsx scripts/sandbox.ts"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.3.1",

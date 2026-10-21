@@ -22,8 +22,14 @@ export async function handle(input: unknown, registry?: WorkflowRegistry, sessio
       case 'record_start': if (!session) return failure('AUTH_REQUIRED', 'Open and authorize a dedicated browser first.'); await session.start(command.inputs); return success({ recording: true });
       case 'record_stop': return session ? success(await session.stop()) : failure('AUTH_REQUIRED', 'Open and authorize a dedicated browser first.');
       case 'recording': return session ? success(session.recording(command.id)) : failure('AUTH_REQUIRED', 'Open and authorize a dedicated browser first.');
-      case 'tools': return registry ? success({ tools: registry.list() }) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
-      case 'run': return registry ? success(await registry.run(command.id, command.inputs)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+      case 'tools': {
+        if (!registry) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+        const tools = registry.list();
+        if (command.offset === undefined) return success({ tools });
+        const page = tools.slice(command.offset, command.offset + 5);
+        return success({ tools: page, nextOffset: command.offset + page.length < tools.length ? command.offset + page.length : null });
+      }
+      case 'run': return registry ? success(await registry.run(command.id, command.inputs, command.manifestDigest)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'verify': return registry && stateDir ? success(await registry.verify(command.id, command.inputs, command.expected, stateDir)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'candidate': return success(compileTool(command.demonstrations, command.specification));
       case 'commands': return success({ commands: discovery });

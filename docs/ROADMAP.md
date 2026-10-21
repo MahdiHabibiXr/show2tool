@@ -30,4 +30,5 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added isolated tarball production-dependency installation smoke, including consumer-local executable shim, CLI discovery, candidate compilation and MCP initialization/tools/call. No workspace dependency links.
 - Added `doctor` prerequisite diagnostics without browser launch or local path output.
 - Added Windows Node 24 CI configuration. Hosted run status is not yet established; do not infer it from local success.
-- Next: runnable synthetic sandbox authoring walkthrough, then named reviewed MCP workflow tools.
+- Added named reviewed MCP workflow mode with actual input schemas and manifest-digest binding. Reconnect to discover new contracts; changed stale calls fail closed.
+- Next: runnable synthetic sandbox authoring walkthrough and broader bounded read contracts.

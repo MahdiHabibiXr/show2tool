@@ -170,7 +170,19 @@ Example host configuration (not installed automatically):
 }
 ```
 
-Available authoring tools are generated from the same command schemas: discovery, inspect, infer, candidate, record start/stop, recording lookup, reviewed-tool listing and generic reviewed-read run. **No review or approval MCP tool exists.** Named per-workflow MCP export, full input/output discovery for each workflow, portable bundles and production writes remain unfinished.
+Available authoring tools are generated from the same command schemas: discovery, inspect, infer, candidate, record start/stop, recording lookup, reviewed-tool listing and generic reviewed-read run. **No review or approval MCP tool exists.** Portable standalone bundles and production writes remain unfinished. Named reviewed-tool MCP mode is available below; it is not a portable export.
+
+### Named reviewed workflow tools
+
+For execution-only discovery with the workflow's actual required string inputs, start the human host, review/load the desired tools, then connect a separate MCP entrypoint:
+
+```text
+node dist/src/cli.js serve --stdio --reviewed
+```
+
+Use the same MCP client configuration shown above, adding `"--reviewed"` after `"--stdio"` in `args`. A reviewed ID such as `find_books` appears as `workflow_find_books` with its input names and maximum lengths. It calls the same reviewed broker runtime; no separate credentials or authorization are created.
+
+This mode snapshots tools at startup. Reconnect after reviewing new or changed definitions. Every named call includes the manifest digest discovered at startup; if that ID now refers to a different contract, the broker rejects it with `REVIEW_REQUIRED` before sending a request. After a host restart, tools cannot execute until the human reviews them again. Tool listing itself sends no application API requests. Use authoring mode for capture/compile/verify; named mode exposes only the reviewed read workflows.
 
 ## Current safety and compatibility limits
 
