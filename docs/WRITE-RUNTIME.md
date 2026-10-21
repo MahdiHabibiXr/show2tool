@@ -28,6 +28,12 @@ Deletion, payments, permission changes, bulk mutations, external sending/publica
 4. Synthetic broker integration, concurrent calls, denial/expiry and crash probes.
 5. Live human synthetic confirmation exercise before enabling any nonfixture target.
 
+## Internal proposal schema checkpoint
+
+The disconnected `mutationSchema` describes POST creates and PATCH/PUT updates with fixed same-origin paths, bounded string inputs/body bindings, a principal read, optional explicitly named CSRF header source and required scalar read-back expectations. Updates require an `if-match` precondition read and the same target path for write/read-back. Creates require a response ID source used only as an ID-safe read-back path segment. `prepareMutation` validates supplied evidence and resolves a proposal without network access. It does not establish that evidence came from a server; the future coordinator must fetch and bind it through reviewed reads.
+
+No public CLI/MCP mutation registration or execution is enabled by these types.
+
 ## Current foundation limits
 
 The internal journal has exclusive file claims, synced file contents, claim-owner-only one-use completion, and interrupted/corrupt state classified unknown. POSIX paths additionally sync directory entries. Windows does not expose the same directory-sync guarantee through this implementation; tests establish process-termination recovery, not power-loss durability. This gap must be resolved or explicitly constrained before enabling a nonfixture mutation transport. The journal is not a tamper-proof audit log against same-user filesystem access.
