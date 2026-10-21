@@ -34,6 +34,8 @@ The disconnected `mutationSchema` describes POST creates and PATCH/PUT updates w
 
 No public CLI/MCP mutation registration or execution is enabled by these types.
 
+A synthetic-only coordinator in `spike/mutations.ts` now integrates these pieces using the process-registered fixture transport. Tests independently count effects for approved creates/updates, concurrent dispatch, principal changes, preflight expiry and lost acknowledgments. Read-back checks the response/read identity and each approved changed field; updates also check the fixture version increment. Sensitive coordinator contexts are removed on denial, consumption and expiry. This coordinator is not packaged as a general-purpose write interface and does not substitute for broker parity, live-human exercise or Windows power-loss guarantees.
+
 ## Current foundation limits
 
 The internal journal has exclusive file claims, synced file contents, claim-owner-only one-use completion, and interrupted/corrupt state classified unknown. POSIX paths additionally sync directory entries. Windows does not expose the same directory-sync guarantee through this implementation; tests establish process-termination recovery, not power-loss durability. This gap must be resolved or explicitly constrained before enabling a nonfixture mutation transport. The journal is not a tamper-proof audit log against same-user filesystem access.

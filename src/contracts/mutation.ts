@@ -16,8 +16,13 @@ export const mutationSchema = z.object({
   precondition: z.object({ path: pathSchema, pointer, header: z.literal('if-match') }).strict().optional(),
   readBack: z.object({ path: pathSchema, idSource: pointer.optional(), expected: z.record(pointer, expectation).refine(value => Object.keys(value).length > 0 && Object.keys(value).length <= 20) }).strict(),
 }).strict().refine(contract => {
-  if (contract.effect === 'create' && (contract.method !== 'POST' || !contract.readBack.idSource || !pathInputs(contract.readBack.path).includes('createdId'))) return false;
+  if (contract.effect === 'create' && (contract.method !== 'POST' || contract.readBack.idSource !== '/id' || !pathInputs(contract.readBack.path).includes('createdId'))) return false;
   if (contract.effect === 'update' && (!['PATCH', 'PUT'].includes(contract.method) || !contract.precondition || contract.readBack.idSource || contract.precondition.path !== contract.path || contract.readBack.path !== contract.path)) return false;
+  if (!Object.values(contract.readBack.expected).some(binding => binding.source === 'principal')) return false;
+  for (const [key, binding] of Object.entries(contract.body)) {
+    const expected = contract.readBack.expected[`/${key}`];
+    if (!expected || JSON.stringify(expected) !== JSON.stringify(binding)) return false;
+  }
   const paths = [contract.path, contract.principal.path, ...(contract.csrf ? [contract.csrf.path] : []), ...(contract.precondition ? [contract.precondition.path] : [])];
   if (paths.flatMap(pathInputs).some(name => !Object.hasOwn(contract.inputs, name))) return false;
   if (pathInputs(contract.readBack.path).some(name => name !== 'createdId' && !Object.hasOwn(contract.inputs, name))) return false;

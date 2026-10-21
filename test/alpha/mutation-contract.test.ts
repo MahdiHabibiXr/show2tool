@@ -12,6 +12,8 @@ it('requires a server precondition for updates and explicit independently checka
   expect(mutationSchema.safeParse({ ...update, precondition: undefined }).success).toBe(false);
   expect(mutationSchema.safeParse({ ...create, readBack: { ...create.readBack, expected: {} } }).success).toBe(false);
   expect(mutationSchema.safeParse({ ...create, method: 'DELETE' }).success).toBe(false);
+  expect(mutationSchema.safeParse({ ...create, readBack: { ...create.readBack, idSource: '/title' } }).success).toBe(false);
+  expect(mutationSchema.safeParse({ ...create, readBack: { ...create.readBack, expected: { '/tenant': { source: 'principal' } } } }).success).toBe(false);
   expect(mutationSchema.safeParse({ ...create, body: { title: { source: 'input', name: 'missing' } } }).success).toBe(false);
   expect(mutationSchema.safeParse({ ...create, principal: { path: '/me/{missing}', pointer: '/tenant' } }).success).toBe(false);
   expect(mutationSchema.safeParse({ ...create, csrf: { ...create.csrf, header: 'authorization' } }).success).toBe(false);
