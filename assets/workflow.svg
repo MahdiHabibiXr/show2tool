@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="380" viewBox="0 0 1200 380" role="img" aria-labelledby="title desc">
+<title id="title">From browser demonstration to a reusable read tool</title>
+<desc id="desc">Demonstrate two inputs, compile a candidate, review it in a human terminal, then run it through CLI or MCP. Saved definitions require fresh review after restart.</desc>
+<defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#101c2e"/><stop offset="1" stop-color="#162e3c"/></linearGradient></defs>
+<rect width="1200" height="380" rx="24" fill="url(#bg)"/>
+<g font-family="Segoe UI,Arial,sans-serif">
+<text x="44" y="53" fill="#f1f5f9" font-size="25" font-weight="700">Show the workflow. Keep the contract.</text>
+<text x="44" y="84" fill="#b9cad9" font-size="17">Local browser evidence → reviewed read tools → reusable definitions</text>
+<g fill="#20384a" stroke="#486376"><rect x="44" y="120" width="250" height="165" rx="14"/><rect x="331" y="120" width="250" height="165" rx="14"/><rect x="618" y="120" width="250" height="165" rx="14"/><rect x="905" y="120" width="250" height="165" rx="14"/></g>
+<g fill="#7cdec7" font-size="15" font-weight="700"><text x="66" y="151">01 / DEMONSTRATE</text><text x="353" y="151">02 / COMPILE</text><text x="640" y="151">03 / HUMAN REVIEW</text><text x="927" y="151">04 / REUSE</text></g>
+<g fill="#f1f5f9" font-size="21" font-weight="600"><text x="66" y="189">Two different inputs</text><text x="353" y="189">One explicit contract</text><text x="640" y="189">You grant access</text><text x="927" y="189">CLI + MCP reads</text></g>
+<g fill="#c4d2de" font-size="16"><text x="66" y="224">Dedicated Chrome profile</text><text x="66" y="251">Scoped passive recording</text><text x="353" y="224">Fixed destination + inputs</text><text x="353" y="251">Ambiguity fails closed</text><text x="640" y="224">Review exact mappings</text><text x="640" y="251">No agent approval tool</text><text x="927" y="224">Save versioned definitions</text><text x="927" y="251">Re-review after restart</text></g>
+<g fill="#7cdec7" font-size="26"><text x="302" y="208">›</text><text x="589" y="208">›</text><text x="876" y="208">›</text></g>
+<text x="44" y="332" fill="#b9cad9" font-size="16">Read-only development alpha · No separate model API key · No credentials or review grants in saved tools</text>
+</g></svg>

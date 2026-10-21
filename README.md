@@ -5,6 +5,7 @@ English · [فارسی](docs/i18n/README.fa.md) · [العربية](docs/i18n/RE
 </p>
 
 <p align="center">
+  <a href="#-copy-this-setup-prompt-to-your-coding-agent">Agent setup prompt</a> ·
   <a href="#quick-start">Quick start</a> ·
   <a href="#how-it-works">How it works</a> ·
   <a href="#built-vs-planned">Built vs. planned</a> ·
@@ -13,22 +14,66 @@ English · [فارسی](docs/i18n/README.fa.md) · [العربية](docs/i18n/RE
 </p>
 
 <p align="center">
-  <img alt="Stage: feasibility prototype" src="https://img.shields.io/badge/stage-feasibility_prototype-277a99?style=flat-square" />
+  <img alt="Stage: read-tool development alpha" src="https://img.shields.io/badge/stage-read_tool_alpha-277a99?style=flat-square" />
   <img alt="Node.js 24+" src="https://img.shields.io/badge/Node.js-24%2B-426c51?style=flat-square" />
   <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square" />
   <img alt="Local-first" src="https://img.shields.io/badge/local--first-no_hosted_service-526576?style=flat-square" />
 </p>
 
-## Turn a demonstration into something you can check
+## 🎬 Show a workflow. Keep a reusable tool.
 
-**Show2Tool explores a simple idea: demonstrate a browser workflow, identify its inputs, and prove the result on an example it has not seen.**
+**Demonstrate an authorized browser read twice. Compile its inputs into an inspectable contract. Review it yourself. Call it from your agent.**
 
-The current prototype captures API traffic from an isolated Chrome session, infers simple input bindings, and replays them against a synthetic application. It also tests one-use approvals and read-back verification for bounded create/update actions.
+Show2Tool is a local TypeScript CLI and MCP authoring server. The development alpha connects scoped browser recording, candidate compilation, human-reviewed JSON reads, and versioned saved definitions. Your existing coding agent supplies the reasoning—there is no embedded model loop or separate model API key.
 
-The longer-term goal is a local skill and CLI that export reusable CLI/MCP tools. **That export pipeline is not built yet.**
+<p align="center">
+  <img src="assets/workflow.svg" alt="Four stages: demonstrate two inputs, compile a contract, review as a human, reuse with CLI and MCP" width="100%" />
+</p>
+
+| | What you get today |
+| :---: | :--- |
+| 🧭 | **Scoped recording** in a dedicated Chrome profile; login happens before capture. |
+| 🧩 | **Input inference** for a single fixed-path request with scalar query/body bindings. |
+| 🔐 | **Human-reviewed reads** with fixed destinations, scoped cookies and bounded JSON output. |
+| 🛠️ | **CLI + MCP authoring** from shared command schemas and runtime handlers. |
+| 💾 | **Saved definitions** that survive restart; permissions never do. |
+| 🧪 | **Synthetic integration tests** covering capture, execution, review boundaries and recovery. |
 
 > [!IMPORTANT]
-> **Research prototype, not production automation.** Only synthetic local fixtures are supported. Do not use the spike against real accounts. No npm release or installable MCP server is available.
+> **Development alpha—not production automation.** External-account compatibility is not established. Start with synthetic data or an authorized sandbox. The new runtime executes GET reads only; write probes live separately in `spike/`. No npm release, portable workflow export or named per-workflow MCP export is available.
+
+## 🤖 Copy this setup prompt to your coding agent
+
+Copy the entire block below into your agent. It installs from source, checks the checkout, and leaves browser authorization to you.
+
+```text
+Set up Show2Tool from https://github.com/MahdiHabibiXr/show2tool.
+
+1. Check for Node.js 24+, npm, Git and Google Chrome. Report missing
+   prerequisites; do not change system settings or install global tools.
+2. Clone the repository into a new show2tool directory. If it already exists,
+   inspect it first; do not overwrite files, discard changes or reset branches.
+3. Read package.json, README.md, docs/AGENT-USAGE.md and
+   skills/show2tool/SKILL.md before running project commands.
+4. Run npm ci --ignore-scripts, npm run typecheck, npm test, and
+   npm run demo. Report actual results and any environment limitations.
+5. Run npm run agent -- commands and npm run agent -- schema to discover
+   supported interfaces. Use absolute executable paths outside the checkout.
+6. Ask which authorized sandbox and read-only task I want to demonstrate.
+   Help draft a narrow scope file; never guess permission for a real account.
+7. Ask ME to start the host in an interactive terminal, authorize the scope,
+   and log in manually. Never type or pipe human authorization/review phrases,
+   copy cookies, use my daily browser profile, or perform write actions.
+8. Guide two different demonstrations, compile the broker-owned recordings,
+   save the complete successful result, and ask me to review it in the host.
+   After restart, I can use saved and load <tool-id> to review it again.
+
+Do not publish, push, configure an MCP client, or claim semantic verification
+without my permission and independent expected results. No extra model API
+key is needed. Explain unsupported workflows instead of bypassing safeguards.
+```
+
+**Want the shortest path first?** Run the synthetic demo below. For browser authoring and MCP setup, follow [the agent usage guide](docs/AGENT-USAGE.md). Translated READMEs currently describe the earlier feasibility milestone; this English guide reflects the read-tool alpha.
 
 ## Quick start
 
@@ -74,6 +119,65 @@ npm run cli -- infer my-new-evidence/demonstrations.json
 
 Saved artifacts contain synthetic recordings, annotated demonstrations and a result report—not an executable tool export. Existing evidence is never overwritten.
 
+## 🧑‍💻 Example: a reusable catalog search
+
+Suppose your authorized sandbox exposes `GET /api/catalog/search?term=...`. Demonstrate searches for two different terms, then compile the selected request from each recording. The candidate binds your `searchText` input to `term`; it does not execute the request during compilation.
+
+**Start the human host** after preparing a narrow scope file:
+
+```text
+npm run build
+node dist/src/cli.js host scope.json
+```
+
+**Ask the agent to record** one demonstration at a time using command files:
+
+```json
+{"command":"record_start","inputs":{"searchText":"first query"}}
+```
+
+Demonstrate the search yourself, then send `{"command":"record_stop"}`. Repeat with a different query. Use `schema` to discover the full `compile_recordings` specification and select the returned recording/request IDs.
+
+**Save compiler output and review it** in the human host console:
+
+```text
+review path/to/candidate.json
+```
+
+The console displays the exact contract and requires `review <tool-id>`. Successful scoped review also saves the definition locally. The agent can now call:
+
+```json
+{"command":"run","id":"find_catalog","inputs":{"searchText":"unseen query"}}
+```
+
+The ID must match your compiled specification. Compare the projected result with independently expected facts—HTTP success alone is not semantic verification.
+
+**Come back tomorrow without recording again:**
+
+```text
+saved
+load find_catalog
+```
+
+These are human-console commands. Loading displays the saved contract and requires fresh review; it never restores an old permission. For multiple versions, use `load <tool-id> <digest>`.
+
+### 🔌 Connect an MCP client
+
+After building, configure your client to launch the local authoring server. Replace the executable path with your checkout's absolute path:
+
+```json
+{
+  "mcpServers": {
+    "show2tool": {
+      "command": "node",
+      "args": ["/absolute/path/show2tool/dist/src/cli.js", "serve", "--stdio"]
+    }
+  }
+}
+```
+
+This exposes `show2tool_*` authoring tools. Start the human host separately for recording and execution. MCP cannot authorize scope or approve a workflow. See [the full setup and safety guide](docs/AGENT-USAGE.md) for scope examples, Windows quoting and current limits.
+
 ## How it works
 
 ```text
@@ -107,16 +211,19 @@ HTTP 200 and a valid JSON shape are not enough: the tests also check the selecte
 | Human terminal confirmation | Helper available; **live human exercise pending** |
 | General website workflow compiler | **Planned** |
 | Portable executable CLI/MCP export | **Planned** |
-| Cross-process confirmation broker and public skill | **Planned** |
+| Local read-session broker and authoring skill | **Implemented for the development alpha** |
+| Human-reviewed CLI/MCP GET runtime | **Implemented**, shared command handlers |
+| Versioned saved definitions + fresh review after restart | **Implemented**, no persisted execution grants |
+| Durable write-confirmation broker | **Planned** |
 
 ## Safety model
 
 ### Local by default
 
 - No hosted service, embedded model loop or separate AI API key.
-- Temporary profiles; no copying browser cookie databases or your daily Chrome profile.
-- Replay is restricted to synthetic origins registered in the same process.
-- Credential canaries are fixture data—not credentials for a real service.
+- The synthetic demo uses a temporary profile; the alpha host uses a dedicated persistent profile containing sensitive login state. Neither copies your daily Chrome profile.
+- Spike replay is restricted to registered synthetic origins. The alpha read runtime instead enforces the human-reviewed origin/path/field scope and destination policy.
+- Saved definitions contain manifests only, not cookies, recordings or execution grants. Approved literal values can still be sensitive; keep the local catalog private.
 
 ### Explicit effects
 
@@ -193,8 +300,10 @@ The projects overlap in making software usable by agents. They are not the same 
 - [x] Captured create demonstrations → approved synthetic write → read-back
 - [x] Compact evidence inspection and crash-outcome probes
 - [ ] Finish feasibility gates: live human confirmation and competitor execution
-- [ ] Generalize the reviewed workflow contract and runtime
-- [ ] Add the cross-process human approval broker
+- [x] Single-request reviewed read contract and CLI/MCP runtime
+- [x] Local read-session broker and versioned saved definitions
+- [ ] Broaden supported contracts beyond single fixed-path requests
+- [ ] Add durable cross-process write approval
 - [ ] Export inspectable CLI and MCP packages from the same runtime
 - [ ] Package the authoring skill and test it in a fresh agent session
 - [ ] Publish compatibility results and reproducible benchmarks
