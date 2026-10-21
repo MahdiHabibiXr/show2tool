@@ -14,6 +14,13 @@ export class WorkflowRegistry {
   list(): { id: string; effect: string; inputs: Manifest['inputs'] }[] {
     return [...this.tools.values()].map(({ manifest }) => ({ id: manifest.id, effect: manifest.effect, inputs: structuredClone(manifest.inputs) }));
   }
+  async verify(id: string, inputs: unknown, expected: import('../runtime/verify.js').Expectations, stateDir: string): Promise<unknown> {
+    const tool = this.tools.get(id);
+    if (!tool) throw new Error('REVIEW_REQUIRED');
+    const manifest = structuredClone(this.reviews.require(tool.manifest));
+    const { verifyRead } = await import('../runtime/verify.js');
+    return verifyRead(manifest, inputs, expected, () => this.run(id, inputs), stateDir);
+  }
   async run(id: string, inputs: unknown): Promise<unknown> {
     const tool = this.tools.get(id);
     if (!tool) throw new Error('REVIEW_REQUIRED');

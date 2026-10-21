@@ -27,7 +27,7 @@ export async function startBroker(stateDir: string, registry?: WorkflowRegistry,
       responding = true;
       void (async () => {
         let result: Result;
-        try { result = await handle(JSON.parse(data.subarray(0, end).toString('utf8')), registry, session); }
+        try { result = await handle(JSON.parse(data.subarray(0, end).toString('utf8')), registry, session, stateDir); }
         catch { result = failure('INVALID_INPUT', 'Invalid IPC request.'); }
         socket.end(JSON.stringify(result) + '\n');
       })();

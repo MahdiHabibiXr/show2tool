@@ -150,7 +150,13 @@ The console displays the exact contract and requires `review <tool-id>`. Success
 {"command":"run","id":"find_catalog","inputs":{"searchText":"unseen query"}}
 ```
 
-The ID must match your compiled specification. Compare the projected result with independently expected facts—HTTP success alone is not semantic verification.
+The ID must match your compiled specification. Check independently expected facts with `verify`—HTTP success alone is not semantic verification:
+
+```json
+{"command":"verify","id":"find_catalog","inputs":{"searchText":"unseen query"},"expected":{"/items/0/id":"book_3","/items/length":1}}
+```
+
+Use facts from an independent source, not the response you just received. Check `data.status` (`passed` or `failed`), not only `ok`. The host saves a digest-bound report without raw inputs, expected values or response values. This checks a named case; it does not prove an input was unseen or certify the tool generally. See [verification details](docs/AGENT-USAGE.md#verify-independently-expected-results).
 
 **Come back tomorrow without recording again:**
 

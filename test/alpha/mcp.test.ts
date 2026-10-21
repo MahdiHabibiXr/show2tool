@@ -25,5 +25,11 @@ it('advertises network effects accurately for reviewed read execution', async ()
     const run = list.tools.find(tool => tool.name === 'show2tool_run');
     expect(run?.annotations?.openWorldHint).toBe(true);
     expect(run?.description).toContain('reviewed');
+    const verify = list.tools.find(tool => tool.name === 'show2tool_verify');
+    expect(verify?.annotations?.openWorldHint).toBe(true);
+    expect(verify?.annotations?.readOnlyHint).toBe(false);
+    expect(verify?.inputSchema).toMatchObject({ properties: { expected: expect.any(Object) } });
+    const result = await client.callTool({ name: 'show2tool_verify', arguments: { id: 'missing', inputs: {}, expected: { '/items/0/id': 'book_3' } } });
+    expect(result.structuredContent).toMatchObject({ ok: false });
   } finally { await client.close(); }
 });

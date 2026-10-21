@@ -10,10 +10,10 @@ export async function serve(): Promise<void> {
     server.registerTool(`show2tool_${name}`, {
       description: discovery.find(command => command.name === name)!.description,
       inputSchema: z.object(Object.fromEntries(Object.entries(schema.shape).filter(([key]) => key !== 'command')) as Record<string, z.ZodType>).strict(),
-      annotations: { readOnlyHint: !['record_start', 'record_stop'].includes(name), destructiveHint: false, openWorldHint: name === 'run' },
+      annotations: { readOnlyHint: !['record_start', 'record_stop', 'verify'].includes(name), destructiveHint: false, openWorldHint: ['run', 'verify'].includes(name) },
     }, async args => {
       const input = { ...args, command: name };
-      const result = ['compile_recordings', 'record_start', 'record_stop', 'recording', 'tools', 'run'].includes(name)
+      const result = ['compile_recordings', 'record_start', 'record_stop', 'recording', 'tools', 'run', 'verify'].includes(name)
         ? await (await import('../broker/server.js')).callBroker((await import('../browser/host.js')).defaultStateDir(), input)
         : await handle(input);
       return { content: [{ type: 'text', text: JSON.stringify(result) }], structuredContent: result, isError: !result.ok };

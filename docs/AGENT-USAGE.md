@@ -122,7 +122,28 @@ Use command files containing:
 {"command":"run","id":"your_tool_id","inputs":{"searchText":"unseen query"}}
 ```
 
-The runtime resolves scoped cookies inside the host, blocks redirects/unreviewed destinations, performs a bounded JSON GET and returns only projected fields. It does not yet provide the final declarative semantic verification command; independently compare held-out results before trusting an integration. The current schema can describe create/update candidates, but registration and execution of those actions are disabled.
+The runtime resolves scoped cookies inside the host, blocks redirects/unreviewed destinations, performs a bounded JSON GET and returns only projected fields. Use `verify` below to check independently specified expected facts; execution success alone does not establish correctness. The current schema can describe create/update candidates, but registration and execution of those actions are disabled.
+
+## Verify independently expected results
+
+Write a command file and send it through `call-file`, or call `show2tool_verify` through MCP:
+
+```json
+{
+  "command": "verify",
+  "id": "your_tool_id",
+  "inputs": { "searchText": "unseen query" },
+  "expected": { "/items/0/id": "book_3", "/items/length": 1 }
+}
+```
+
+Expectations are JSON Pointers into the original response, restricted to already-reviewed projected fields. For a projection of `/items`, `/items/0/id` checks the first record and `/items/length` checks array size. Supply 1–20 scalar expectations (string, finite number, boolean or null); strings are capped at 200 characters. Missing fields fail, even when expecting null. Objects/arrays are not equality operands.
+
+A completed check returns `ok: true` with `data.status` equal to `passed` or `failed`, plus per-pointer boolean assertions. **Check status, not only `ok`**; assertion failures are valid verification reports, not transport failures. Execution errors return `ok: false` and no verification verdict. A storage failure returns `EVIDENCE_SAVE_FAILED` rather than claiming evidence was saved.
+
+Reports are stored under `~/.show2tool/verification/<evidenceId>.json`. They contain timestamp, tool ID, manifest digest, case digest, status and assertion pointers/booleans—not raw inputs, expected values, output values or cookies. Digests are fingerprints, not encryption; low-entropy values can be guessed, and pointer names may be sensitive. Keep reports private. Reports are local evidence, not signed attestations or authorization grants.
+
+Expected facts must come from an independent source, not the response being tested. The command does not prove an input was unseen, establish training-data provenance, or certify a workflow generally. Changing the manifest changes its digest; old reports do not validate the changed contract. Choose a fresh case after tuning against a failed one.
 
 ## MCP connection
 
