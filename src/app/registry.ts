@@ -18,6 +18,13 @@ export class WorkflowRegistry {
   list(): { id: string; effect: string; inputs: Manifest['inputs']; manifestDigest: string; chainSupported: boolean }[] {
     return [...this.tools.values()].map(({ manifest }) => ({ id: manifest.id, effect: manifest.effect, inputs: structuredClone(manifest.inputs), manifestDigest: manifestHash(manifest), chainSupported: !manifest.pagination }));
   }
+  exportDefinitions(ids: string[]): Manifest[] {
+    return ids.map(id => {
+      const tool = this.tools.get(id);
+      if (!tool) throw new Error('REVIEW_REQUIRED');
+      return structuredClone(this.reviews.require(tool.manifest));
+    });
+  }
   async runChain(inputs: Record<string, string>, steps: import('../contracts/chain.js').ChainSteps): Promise<unknown> {
     const snapshots = steps.map(step => {
       const tool = this.tools.get(step.id);

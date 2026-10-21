@@ -40,4 +40,6 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added `verify_chain` reports bound to ordered step definitions and final manifest digests, with scalar independent expected-result assertions.
 - Added reusable versioned chain definitions with typed inputs and explicit digest selection; saving grants no permissions and restart still requires fresh constituent-tool reviews.
 - Added typed named MCP entrypoints for unambiguous saved chains with current constituent reviews; explicit digest calls remain available for multiple versions.
+- Added definition-only read bundle export/import; transferred manifests remain inactive until recipient scope authorization and review. No credentials or grants are portable.
+- Recorded a separate fresh-agent source-checkout exercise on the same Windows host; hosted CI and live-human authoring remain unproven.
 - Next: release evidence/compatibility cleanup and the separately gated write lifecycle. General-purpose release acceptance is not yet complete.

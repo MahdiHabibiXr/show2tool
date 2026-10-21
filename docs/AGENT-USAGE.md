@@ -248,6 +248,14 @@ Use the same MCP client configuration shown above, adding `"--reviewed"` after `
 
 This mode snapshots tools at startup. Reconnect after reviewing new or changed definitions. Every named call includes the manifest digest discovered at startup; if that ID now refers to a different contract, the broker rejects it with `REVIEW_REQUIRED` before sending a request. After a host restart, tools cannot execute until the human reviews them again. Tool listing itself sends no application API requests. Use authoring mode for capture/compile/verify; named mode exposes reviewed read workflows and eligible saved read chains. A saved chain appears as `chain_<id>` only when it has a single saved version and every constituent manifest digest is currently reviewed and composition-capable (nonpaginated). Saved-chain discovery is capped at 1,000 definitions; if it cannot complete, reviewed single-workflow tools remain available and a sanitized diagnostic goes to stderr. Multiple saved versions are omitted rather than chosen arbitrarily; use explicit `run_saved_chain`/`verify_saved_chain` with a digest instead. Named chain calls recheck permissions and pinned digests at execution.
 
+## Transfer read definitions between installations
+
+`export_bundle` takes selected currently reviewed IDs and returns a versioned `show2tool-read-bundle` containing their manifests. It does not include cookies, profiles, scope grants or execution approvals. It is a **definition bundle**, not an executable package or signed attestation. Approved literal query values and provenance may still be sensitive; inspect and redact/review as necessary before sharing. Never assume heuristic secret filtering makes a manifest safe to publish.
+
+Save the `data` object from the successful export result. On the recipient host, send `{"command":"import_bundle","bundle": ...}` with that object. Up to 20 unique GET read definitions are supported, with a 30,000-byte aggregate bundle cap and 28,000-byte per-manifest cap preflighted before import writes. Export fewer definitions if the selected set exceeds that budget. Imported definitions appear in the human console's `saved` catalog, not the active agent `tools` list. The human must authorize a suitable browser scope and `load <id> <digest>` for fresh review. Recipient credentials stay local.
+
+Export does not execute application requests. Import writes definitions only and grants no permissions. It never changes an existing active tool; same-ID changed definitions become separate digest versions. Multi-file import is not a transaction: an I/O failure may leave some inactive definitions saved; inspect `saved` and retry, never infer execution permission from filesystem state.
+
 ## Current safety and compatibility limits
 
 - No production-ready claim or tested external-account compatibility matrix.

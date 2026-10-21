@@ -17,7 +17,8 @@ Environment: Windows 11, Node.js 24.13.1, npm 11.16.0, standard Google Chrome in
 
 - Hosted CI: Windows and Ubuntu matrix configured. A green hosted run has not been observed in this development session; GitHub CLI authentication is unavailable.
 - Linux/macOS compatibility: platform lookup rules tested; no local OS execution evidence on these platforms. macOS CI is not configured.
-- Fresh-agent setup prompt: written, but no independent fresh-agent completion exercise is recorded.
+- Fresh source setup was exercised by a separate agent in a new temporary clone of remote main at `fe32d61a5e93637aa686f34de7158ed61e91e39b` on this same Windows machine: `npm ci --ignore-scripts`, typecheck, 160 tests, synthetic demo (gamma → a3, zero writes), doctor, commands and schema all passed. This is not independent OS evidence or a complete human authoring run.
+- The updated bundled guide was behavior-tested with a restart/saved-chain/named-MCP/verification scenario; the agent correctly retained the human-review boundary and distinguished assertion status from transport success.
 - Complete live-human walkthrough: instructions in SANDBOX.md; no completed human run is claimed.
 
 ## Unsupported or unfinished

@@ -1,5 +1,7 @@
 import { z } from 'zod';
 import { SavedChains } from './chains.js';
+import { SavedToolCatalog } from './catalog.js';
+import { bundleSchema } from '../contracts/bundle.js';
 import type { BrowserSession } from '../browser/session.js';
 import type { WorkflowRegistry } from './registry.js';
 import { compileTool } from '../workflow/candidate.js';
@@ -31,6 +33,24 @@ export async function handle(input: unknown, registry?: WorkflowRegistry, sessio
         return success({ tools: page, nextOffset: command.offset + page.length < tools.length ? command.offset + page.length : null });
       }
       case 'run': return registry ? success(await registry.run(command.id, command.inputs, command.manifestDigest)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+      case 'export_bundle': {
+        if (!registry) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+        const bundle = { schemaVersion: 1, kind: 'show2tool-read-bundle', tools: registry.exportDefinitions(command.ids) };
+        const parsed = bundleSchema.safeParse(bundle);
+        return parsed.success ? success(parsed.data) : failure('BUDGET_EXCEEDED', 'Selected definitions exceed the bundle budget.', 'Export fewer or smaller read definitions.');
+      }
+      case 'import_bundle': {
+        if (!stateDir) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
+        const catalog = new SavedToolCatalog(stateDir);
+        const imported = [];
+        for (const manifest of command.bundle.tools) {
+          try {
+            const saved = await catalog.save(manifest);
+            imported.push({ id: saved.id, digest: saved.digest });
+          } catch { return failure('DEFINITION_SAVE_FAILED', 'Bundle import could not finish.', 'Some inactive definitions may have been saved. Inspect the human saved catalog before retrying; no execution permission was granted.'); }
+        }
+        return success({ imported, permissionGranted: false });
+      }
       case 'save_chain': return stateDir ? success(await new SavedChains(stateDir).save(command.definition)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'chains': {
         if (!stateDir) return failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
