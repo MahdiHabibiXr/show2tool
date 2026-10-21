@@ -10,3 +10,6 @@ coverage/
 !.env.example
 docs/superpowers/
 docs/research/
+dist/
+*.tgz
+.claude/

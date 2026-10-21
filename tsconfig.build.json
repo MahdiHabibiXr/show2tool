@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "outDir": "dist",
+    "rootDir": ".",
+    "declaration": true,
+    "types": ["node"]
+  },
+  "include": ["src/**/*.ts", "spike/infer.ts", "spike/inspect.ts"],
+  "exclude": ["test", ".claude", "node_modules", "dist"]
+}

@@ -1,3 +1,5 @@
+English · [فارسی](docs/i18n/README.fa.md) · [العربية](docs/i18n/README.ar.md) · [Español](docs/i18n/README.es.md) · [简体中文](docs/i18n/README.zh-CN.md)
+
 <p align="center">
   <img src="assets/banner.svg" alt="Show2Tool — demonstrate, parameterize, verify" width="100%" />
 </p>

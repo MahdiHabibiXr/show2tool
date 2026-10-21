@@ -1,5 +1,5 @@
 {
-  "name": "show2tool-spike",
+  "name": "show2tool",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,13 +12,40 @@
     "test:spike": "vitest run test/spike",
     "demo": "tsx spike/demo.ts",
     "probe:manual": "tsx spike/manual.ts",
-    "cli": "tsx spike/cli.ts"
+    "cli": "tsx spike/cli.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "pretest": "npm run build",
+    "agent": "node dist/src/cli.js"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.3.1",
     "@types/node": "24.19.2",
-    "playwright": "1.64.1",
     "tsx": "4.23.15",
     "typescript": "7.0.2",
     "vitest": "5.0.5"
-  }
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.3.1",
+    "ipaddr.js": "2.5.0",
+    "playwright": "1.64.1",
+    "zod": "4.6.7"
+  },
+  "bin": {
+    "show2tool": "dist/src/cli.js"
+  },
+  "exports": {
+    ".": "./dist/src/app/handlers.js"
+  },
+  "files": [
+    "dist/src/",
+    "dist/spike/infer.js",
+    "dist/spike/inspect.js",
+    "README.md",
+    "assets/",
+    "docs/i18n/",
+    "skills/",
+    "dist/spike/capture.js",
+    "dist/spike/sanitize.js",
+    "docs/AGENT-USAGE.md"
+  ]
 }
