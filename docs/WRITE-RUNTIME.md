@@ -36,6 +36,12 @@ No public CLI/MCP mutation registration or execution is enabled by these types.
 
 A synthetic-only coordinator in `spike/mutations.ts` now integrates these pieces using the process-registered fixture transport. Tests independently count effects for approved creates/updates, concurrent dispatch, principal changes, preflight expiry and lost acknowledgments. Read-back checks the response/read identity and each approved changed field; updates also check the fixture version increment. Sensitive coordinator contexts are removed on denial, consumption and expiry. This coordinator is not packaged as a general-purpose write interface and does not substitute for broker parity, live-human exercise or Windows power-loss guarantees.
 
+## Live-human synthetic gate
+
+Run `npm run probe:guarded` in a real interactive terminal. It uses the new synthetic coordinator, displays the exact temporary create payload and principal, and requires the exact intent phrase. Denial produces zero effects. Approval should produce one synthetic effect and an independently checked result. Do not pipe input or ask an agent to type the phrase. Noninteractive execution is refused before creating the fixture. This is not authorization for a real-account write.
+
+The probe deletes its temporary synthetic fixture and local journal after completion. Capture the final status/writes result when reporting the exercise; never attach browser profiles or credentials. No completed live-human run is claimed merely because this command exists.
+
 ## Current foundation limits
 
 The internal journal has exclusive file claims, synced file contents, claim-owner-only one-use completion, and interrupted/corrupt state classified unknown. POSIX paths additionally sync directory entries. Windows does not expose the same directory-sync guarantee through this implementation; tests establish process-termination recovery, not power-loss durability. This gap must be resolved or explicitly constrained before enabling a nonfixture mutation transport. The journal is not a tamper-proof audit log against same-user filesystem access.

@@ -261,6 +261,8 @@ npm run probe:manual
 
 It shows the destination, tenant and exact synthetic create action. Type the requested `approve <intent-id>` phrase to create **one temporary test task**, or anything else to deny. Noninteractive input is refused before the fixture starts.
 
+For the newer strict-contract coordinator, run `npm run probe:guarded` in a real terminal. It checks the exact approved create against an independent synthetic effect counter, then removes its temporary fixture and journal. See [write-runtime gates](docs/WRITE-RUNTIME.md). Both probes are synthetic-only, not public real-account write support.
+
 Automated approval-adapter tests do not substitute for a live human run. That feasibility check remains open.
 
 ## Development

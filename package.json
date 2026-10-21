@@ -17,7 +17,8 @@
     "pretest": "npm run build",
     "agent": "node dist/src/cli.js",
     "test:install": "node scripts/smoke-install.mjs",
-    "sandbox": "tsx scripts/sandbox.ts"
+    "sandbox": "tsx scripts/sandbox.ts",
+    "probe:guarded": "tsx scripts/guarded-probe.ts"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.3.1",
