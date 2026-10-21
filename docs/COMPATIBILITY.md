@@ -12,6 +12,7 @@ Environment: Windows 11, Node.js 24.13.1, npm 11.16.0, standard Google Chrome in
 - Actual MCP initialization/list/call for authoring, named workflows and saved chains.
 - Isolated production tarball installation in a temporary consumer, executable shim through offline npm exec, CLI and MCP calls without workspace dependency links.
 - Agent-driven sandbox UI smoke: synthetic tenant login and gamma query returned record a3 in tenant A.
+- Internal synthetic mutation coordinator: approved create/update effects, principal-switch denial, expiry during preflight, concurrent one-use dispatch, lost acknowledgment, and actual child-process death after an independent server effect. Recovery reports unknown and refuses another journal claim. These tests do not enable public write support or establish power-loss durability.
 
 ## Configured but not established
 
