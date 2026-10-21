@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { manifestHash, ReviewStore } from '../approval/review.js';
 import { executeRead } from '../runtime/execute.js';
 import type { DestinationGrant } from '../runtime/policy.js';
@@ -48,6 +49,15 @@ export class WorkflowRegistry {
       results.push(await this.run(step.id, resolved, step.manifestDigest, signal) as Record<string, unknown>);
     }
     return results[results.length - 1];
+  }
+  async verifyChain(inputs: Record<string, string>, steps: import('../contracts/chain.js').ChainSteps, expected: import('../runtime/verify.js').Expectations, stateDir: string): Promise<unknown> {
+    const last = steps[steps.length - 1];
+    const tool = this.tools.get(last.id);
+    if (!tool || manifestHash(this.reviews.require(tool.manifest)) !== last.manifestDigest) throw new Error('REVIEW_REQUIRED');
+    const manifest = structuredClone(tool.manifest);
+    const digest = createHash('sha256').update(JSON.stringify(steps)).digest('hex');
+    const { verifyRead } = await import('../runtime/verify.js');
+    return verifyRead(manifest, inputs, expected, () => this.runChain(inputs, steps), stateDir, digest);
   }
   async verify(id: string, inputs: unknown, expected: import('../runtime/verify.js').Expectations, stateDir: string): Promise<unknown> {
     const tool = this.tools.get(id);

@@ -9,7 +9,7 @@ const pointer = z.string().max(256).regex(/^(\/(?:[^~/]|~[01])*)*$/).refine(valu
 export const expectationsSchema = z.record(pointer, z.union([z.string().max(200), z.number().finite(), z.boolean(), z.null()])).refine(value => Object.keys(value).length > 0 && Object.keys(value).length <= 20);
 export type Expectations = z.infer<typeof expectationsSchema>;
 
-export async function verifyRead(manifest: Manifest, inputs: unknown, expected: Expectations, execute: () => Promise<unknown>, stateDir: string) {
+export async function verifyRead(manifest: Manifest, inputs: unknown, expected: Expectations, execute: () => Promise<unknown>, stateDir: string, chainDigest?: string) {
   const output = await execute() as Record<string, unknown>;
   const assertions = Object.entries(expected).map(([pointer, expectedValue]) => {
     const projection = manifest.projection.filter(prefix => pointer === prefix || pointer.startsWith(prefix + '/')).sort((a, b) => b.length - a.length)[0];
@@ -29,6 +29,7 @@ export async function verifyRead(manifest: Manifest, inputs: unknown, expected: 
     evidenceId,
     toolId: manifest.id,
     manifestDigest: manifestHash(manifest),
+    ...(chainDigest ? { chainDigest } : {}),
     caseDigest: createHash('sha256').update(JSON.stringify({ inputs, expected })).digest('hex'),
     timestamp: new Date().toISOString(),
     status: assertions.every(assertion => assertion.passed) ? 'passed' : 'failed',

@@ -37,4 +37,5 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Removed the hard-coded Windows Chrome attachment path and configured a Windows/Linux CI matrix. Linux success is not claimed before an actual hosted run.
 - Added bounded sequential composition of 1–5 digest-bound reviewed nonpaginated reads with backward-only projected-result dependencies. Persisted named chains, multi-step compilation and chain verification remain open.
 - Added shared read-chain deadlines spanning credentials/DNS/HTTP, active-request cancellation and no-late-dispatch checks.
-- Next: persisted/verified chain authoring ergonomics, then the separately gated write lifecycle. General-purpose release acceptance is not yet complete.
+- Added `verify_chain` reports bound to ordered step definitions and final manifest digests, with scalar independent expected-result assertions.
+- Next: persisted chain authoring ergonomics, then the separately gated write lifecycle. General-purpose release acceptance is not yet complete.
