@@ -13,6 +13,21 @@ it('owns one IPC endpoint and handles shared commands across clients', async () 
     await expect(startBroker(dir)).rejects.toThrow('BROKER_ALREADY_RUNNING');
   } finally { await broker.close(); await rm(dir, { recursive: true, force: true }); }
 });
+it('allows a bounded multi-page read to outlive the old 15-second IPC deadline', async () => {
+  const dir = await mkdtemp(join(tmpdir(), 'show2tool-long-read-'));
+  const { ReviewStore } = await import('../../src/approval/review.js');
+  const { WorkflowRegistry } = await import('../../src/app/registry.js');
+  class SlowRegistry extends WorkflowRegistry {
+    override async run(): Promise<unknown> {
+      await new Promise(resolve => setTimeout(resolve, 15500));
+      return { '/items': ['finished'] };
+    }
+  }
+  const broker = await startBroker(dir, new SlowRegistry(new ReviewStore()));
+  try {
+    expect(await callBroker(dir, { command: 'run', id: 'slow', inputs: {} })).toMatchObject({ ok: true, data: { '/items': ['finished'] } });
+  } finally { await broker.close(); await rm(dir, { recursive: true, force: true }); }
+}, 25000);
 it('returns stable unavailable error without leaking filesystem paths', async () => {
   const result = await callBroker(join(tmpdir(), 'no-broker-' + Date.now()), { command: 'commands' });
   expect(result).toMatchObject({ ok: false, error: { code: 'BROKER_UNAVAILABLE' } });

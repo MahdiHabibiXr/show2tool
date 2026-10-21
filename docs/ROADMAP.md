@@ -31,4 +31,6 @@ Read authoring, saved definitions and scalar verification are implemented. The l
 - Added `doctor` prerequisite diagnostics without browser launch or local path output.
 - Added Windows Node 24 CI configuration. Hosted run status is not yet established; do not infer it from local success.
 - Added named reviewed MCP workflow mode with actual input schemas and manifest-digest binding. Reconnect to discover new contracts; changed stale calls fail closed.
-- Next: runnable synthetic sandbox authoring walkthrough and broader bounded read contracts.
+- Added runnable read-only synthetic sandbox and command-file walkthrough; agent-driven UI login/search smoke returned the seeded gamma record. A complete live-human authorization walkthrough is still pending.
+- Added explicitly reviewed bounded cursor pagination (up to five pages); cursor scope, repeated-cursor detection and partial-result failure are tested.
+- Next: safe reviewed path parameters and bounded read dependencies; then the separately gated write lifecycle.

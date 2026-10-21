@@ -10,5 +10,6 @@ export const specificationSchema = z.object({
   inputs: z.record(inputName, z.object({ type: z.literal('string'), maxLength: z.number().int().min(1).max(200) }).strict()).refine(value => Object.keys(value).length <= 20),
   projection: z.array(z.string().regex(/^(\/[a-zA-Z0-9_~\-]+)*$/).max(256)).min(1).max(20),
 }).strict();
-export const manifestSchema = specificationSchema.extend({ schemaVersion: z.literal(1), query: z.record(inputName, binding), body: z.record(inputName, binding), provenance: z.array(z.string().max(100)).min(2).max(10) }).strict();
+const paginationSchema = z.object({ cursorQuery: inputName, itemsPointer: z.string().regex(/^(\/[a-zA-Z0-9_~\-]+)+$/).max(256), nextPointer: z.string().regex(/^(\/[a-zA-Z0-9_~\-]+)+$/).max(256), maxPages: z.number().int().min(1).max(5) }).strict();
+export const manifestSchema = specificationSchema.extend({ schemaVersion: z.literal(1), query: z.record(inputName, binding), body: z.record(inputName, binding), provenance: z.array(z.string().max(100)).min(2).max(10), pagination: paginationSchema.optional() }).strict();
 export type Manifest = z.infer<typeof manifestSchema>;

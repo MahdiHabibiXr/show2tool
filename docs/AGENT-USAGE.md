@@ -128,6 +128,25 @@ Use command files containing:
 
 The runtime resolves scoped cookies inside the host, blocks redirects/unreviewed destinations, performs a bounded JSON GET and returns only projected fields. Use `verify` below to check independently specified expected facts; execution success alone does not establish correctness. The current schema can describe create/update candidates, but registration and execution of those actions are disabled.
 
+## Optional bounded cursor pagination
+
+Pagination is an explicit reviewed manifest addition, not automatically inferred. Add the following to a bare candidate manifest, include `cursor` in the host scope's `queryKeys`, then review the changed contract:
+
+```json
+{
+  "pagination": {
+    "cursorQuery": "cursor",
+    "itemsPointer": "/items",
+    "nextPointer": "/next",
+    "maxPages": 3
+  }
+}
+```
+
+This is a fragment, not a complete manifest. The only projection must be the declared items pointer. The first request has no cursor; each response supplies an array and either a nonempty scalar string cursor (at most 200 characters) or `null` to terminate. The cursor query field cannot also be bound by the normal query mapping. The runtime URL-encodes the cursor as a value, never treats it as a destination, and keeps the same origin/path and reviewed credentials.
+
+Limits: 1–5 pages, 100 aggregated items, per-response transport bounds and 32 KiB projected output. Repeated/invalid cursors, excessive items or a non-null cursor at the final allowed page fail; partial results are not returned as complete. Offset/page-number pagination, next-page URLs and inferred pagination are not supported. Verify the resulting aggregated array with independent expectations as usual.
+
 ## Verify independently expected results
 
 Write a command file and send it through `call-file`, or call `show2tool_verify` through MCP:

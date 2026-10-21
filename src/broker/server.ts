@@ -25,6 +25,7 @@ export async function startBroker(stateDir: string, registry?: WorkflowRegistry,
       const end = data.indexOf(10);
       if (end === -1) return;
       responding = true;
+      socket.setTimeout(65000, () => socket.destroy());
       void (async () => {
         let result: Result;
         try { result = await handle(JSON.parse(data.subarray(0, end).toString('utf8')), registry, session, stateDir); }
@@ -48,7 +49,7 @@ export async function callBroker(stateDir: string, command: unknown): Promise<Re
     let data = Buffer.alloc(0);
     let settled = false;
     const finish = (result: Result) => { if (!settled) { settled = true; socket.destroy(); resolveResult(result); } };
-    socket.setTimeout(15000, () => finish(failure('BROKER_UNAVAILABLE', 'Broker did not respond.')));
+    socket.setTimeout(65000, () => finish(failure('BROKER_UNAVAILABLE', 'Broker did not respond.')));
     socket.on('error', () => finish(failure('BROKER_UNAVAILABLE', 'Start the local broker first.')));
     socket.on('end', () => { if (!settled) finish(failure('BROKER_UNAVAILABLE', 'Broker closed before a complete result.')); });
     socket.once('connect', () => {

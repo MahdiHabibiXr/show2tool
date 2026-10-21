@@ -9,6 +9,7 @@ export class WorkflowRegistry {
     const manifest = this.reviews.require(value);
     if (manifest.origin !== grant.origin || (grant.paths && !grant.paths.includes(manifest.path))) throw new Error('REVIEW_REQUIRED');
     if ((grant.queryKeys && Object.keys(manifest.query).some(key => !grant.queryKeys!.includes(key))) || (grant.bodyKeys && Object.keys(manifest.body).some(key => !grant.bodyKeys!.includes(key)))) throw new Error('REVIEW_REQUIRED');
+    if (manifest.pagination && grant.queryKeys && !grant.queryKeys.includes(manifest.pagination.cursorQuery)) throw new Error('REVIEW_REQUIRED');
     this.tools.set(manifest.id, { manifest: structuredClone(manifest), grant: structuredClone(grant) });
   }
   list(): { id: string; effect: string; inputs: Manifest['inputs']; manifestDigest: string }[] {
