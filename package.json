@@ -15,7 +15,8 @@
     "cli": "tsx spike/cli.ts",
     "build": "tsc -p tsconfig.build.json",
     "pretest": "npm run build",
-    "agent": "node dist/src/cli.js"
+    "agent": "node dist/src/cli.js",
+    "test:install": "node scripts/smoke-install.mjs"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "2.3.1",

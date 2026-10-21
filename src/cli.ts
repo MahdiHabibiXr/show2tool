@@ -17,7 +17,7 @@ async function main(): Promise<Result> {
     } finally { await file.close(); }
   }
   if (!command || command === '--help' || command === 'help') return handle({ command: 'commands' });
-  if (command === 'commands' || command === 'schema') return args.length ? failure('INVALID_INPUT', 'Unexpected arguments.') : handle({ command });
+  if (command === 'commands' || command === 'schema' || command === 'doctor') return args.length ? failure('INVALID_INPUT', 'Unexpected arguments.') : handle({ command });
   if (command === 'call' && args.length === 1) {
     if (Buffer.byteLength(args[0]) > 1024 * 1024) return failure('BUDGET_EXCEEDED', 'Input exceeds the 1 MiB limit.');
     try {

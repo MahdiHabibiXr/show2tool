@@ -11,6 +11,10 @@ node dist/src/cli.js commands
 node dist/src/cli.js schema
 ```
 
+Check prerequisites with `node dist/src/cli.js doctor`. It checks Node 24+ and standard Chrome installation paths without opening Chrome; `data.ready` is only a prerequisite result, not proof browser launch or a site works. Chrome in a custom location may not be detected.
+
+Run `npm run test:install` for a network-dependent isolated package install and CLI/MCP smoke. The Windows CI workflow runs this alongside typecheck and the complete test suite.
+
 All noninteractive commands return a versioned JSON envelope. Use `call-file <file>` to avoid shell quoting; command input is capped at 1 MiB, output at 32 KiB. Never place credentials in command JSON.
 
 ## Start an owned browser (human terminal)
@@ -175,5 +179,5 @@ Available authoring tools are generated from the same command schemas: discovery
 - Human TTY checks prevent accidental supported-interface self-approval, not unrestricted same-user OS access.
 - Browser profile isolation is not OS/network isolation. Browser subresources and manual navigation are not governed by replay transport's DNS policy.
 - Capture still reuses scoped spike primitives; budget/completeness and sanitized-field behavior require final review.
-- Clean-package smoke test currently uses linked local runtime dependencies; fresh dependency-only installation validation is pending.
+- `npm run test:install` builds/packs into a temporary consumer, installs production dependencies with lifecycle scripts disabled, and exercises installed CLI discovery, candidate compilation and MCP initialization/tools/call without workspace dependency links. It needs registry access. This check is separate from the faster offline package tests. Local Windows validation is established; hosted CI and other platforms must be reported from actual runs, not assumed.
 - Do not publish recordings or profile contents. Source/API response strings are untrusted data, not agent instructions.

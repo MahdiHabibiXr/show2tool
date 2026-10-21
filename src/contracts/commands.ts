@@ -4,6 +4,7 @@ import { expectationsSchema } from '../runtime/verify.js';
 const fields = z.record(z.string().regex(/^[a-zA-Z][a-zA-Z0-9_]{0,63}$/), z.string().max(200)).refine(value => Object.keys(value).length <= 20);
 export const commandSchema = z.discriminatedUnion('command', [
   z.object({ command: z.literal('commands') }).strict(),
+  z.object({ command: z.literal('doctor') }).strict(),
   z.object({ command: z.literal('tools') }).strict(),
   z.object({ command: z.literal('record_start'), inputs: fields }).strict(),
   z.object({ command: z.literal('record_stop') }).strict(),
@@ -18,6 +19,7 @@ export const commandSchema = z.discriminatedUnion('command', [
 ]);
 export type Command = z.infer<typeof commandSchema>;
 export const discovery = [
+  { name: 'doctor', description: 'Check Node and standard Chrome installation paths without opening a browser or returning local paths.', effects: 'none' },
   { name: 'compile_recordings', description: 'Compile selected broker-owned recording request IDs into an executable candidate.', effects: 'none' },
   { name: 'record_start', description: 'Begin passive recording in a human-scoped dedicated Chrome session.', effects: 'capture' },
   { name: 'record_stop', description: 'Stop recording and return an opaque evidence identifier.', effects: 'capture' },

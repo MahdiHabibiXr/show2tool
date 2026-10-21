@@ -27,6 +27,7 @@ export async function handle(input: unknown, registry?: WorkflowRegistry, sessio
       case 'verify': return registry && stateDir ? success(await registry.verify(command.id, command.inputs, command.expected, stateDir)) : failure('BROKER_UNAVAILABLE', 'Connect to a running broker.');
       case 'candidate': return success(compileTool(command.demonstrations, command.specification));
       case 'commands': return success({ commands: discovery });
+      case 'doctor': return success(await (await import('./doctor.js')).doctor());
       case 'schema': return success(z.toJSONSchema(commandSchema));
       case 'inspect': { const report = inspectRecording(command.recording); return success(report, report.complete); }
       case 'infer': return success(infer(command.demonstrations));
