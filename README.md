@@ -1,204 +1,106 @@
+English · [فارسی](docs/i18n/README.fa.md) · [العربية](docs/i18n/README.ar.md) · [Español](docs/i18n/README.es.md) · [简体中文](docs/i18n/README.zh-CN.md)
+
 <p align="center">
   <img src="assets/banner.svg" alt="Show2Tool — demonstrate, parameterize, verify" width="100%" />
 </p>
 
-<p align="center">
-  <a href="#quick-start">Quick start</a> ·
-  <a href="#how-it-works">How it works</a> ·
-  <a href="#built-vs-planned">Built vs. planned</a> ·
-  <a href="#safety-model">Safety model</a> ·
-  <a href="#roadmap">Roadmap</a>
-</p>
+# Show2Tool
 
-<p align="center">
-  <img alt="Stage: feasibility prototype" src="https://img.shields.io/badge/stage-feasibility_prototype-277a99?style=flat-square" />
-  <img alt="Node.js 24+" src="https://img.shields.io/badge/Node.js-24%2B-426c51?style=flat-square" />
-  <img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-3178c6?style=flat-square" />
-  <img alt="Local-first" src="https://img.shields.io/badge/local--first-no_hosted_service-526576?style=flat-square" />
-</p>
+**Turn scoped browser/API demonstrations into inspectable local tools, then check their results.** Show2Tool has a compiled CLI, a local broker with a dedicated Chrome profile, and an MCP stdio interface using the same command handlers. It has no hosted service, embedded model loop or separate model API key requirement.
 
-## Turn a demonstration into something you can check
+**Narrow release candidate under review, not a production-ready release.** Fresh review is ongoing. Live human acceptance, fresh-install/release validation, CI results and cross-platform compatibility are not established here. The package is `private: true`; **there is no npm publish/release in this checkout's getting-started path**. Build from source, not `npx show2tool` or a global npm installation.
 
-**Show2Tool explores a simple idea: demonstrate a browser workflow, identify its inputs, and prove the result on an example it has not seen.**
+## Getting started
 
-The current prototype captures API traffic from an isolated Chrome session, infers simple input bindings, and replays them against a synthetic application. It also tests one-use approvals and read-back verification for bounded create/update actions.
-
-The longer-term goal is a local skill and CLI that export reusable CLI/MCP tools. **That export pipeline is not built yet.**
-
-> [!IMPORTANT]
-> **Research prototype, not production automation.** Only synthetic local fixtures are supported. Do not use the spike against real accounts. No npm release or installable MCP server is available.
-
-## Quick start
-
-**Requirements:** Node.js 24+, npm, and Google Chrome. Windows is the currently exercised platform; one CDP integration test uses Chrome's standard Windows installation path.
+Requirements: Node.js 24+, npm and installed Google Chrome. From the repository checkout:
 
 ```sh
-git clone https://github.com/MahdiHabibiXr/show2tool.git
-cd show2tool
 npm ci --ignore-scripts
-npm run demo
+npm run build
+node dist/src/cli.js commands
+node dist/src/cli.js schema
+node dist/src/cli.js doctor
 ```
 
-The demo opens an isolated temporary **headless** Chrome profile, demonstrates two searches, and checks a third. It does not access your normal Chrome profile or require a model API key.
-
-### What a successful run shows
+Create `scope.json` for an application you own or are authorized to automate. This is an example shape, not a working service; replace the origin, exact API paths and allowlists. Start with nonsensitive test data.
 
 ```json
 {
-  "status": "passed",
-  "scope": "synthetic fixture only",
-  "trainingInputs": ["alpha", "beta"],
-  "heldOutInput": "gamma",
-  "resultIds": ["a3"],
-  "writes": 0,
-  "captureRows": 2
+  "origin": "https://your-authorized-site.example",
+  "paths": ["/api/catalog/search"],
+  "queryKeys": ["term"],
+  "bodyKeys": [],
+  "cookieNames": ["session"]
 }
 ```
 
-*Selected fields from the demo output. Timing, byte counts and contract hashes are run-specific. This is not a performance benchmark.*
-
-### Keep and inspect the evidence
+A **human**, in a real interactive terminal, starts the host:
 
 ```sh
-# Choose a directory that does not exist yet.
-npm run demo -- --out my-new-evidence
-
-# Group captured endpoints without returning approved scalar values.
-npm run cli -- inspect my-new-evidence/recording.json
-
-# Inspect the parameter mapping learned from annotated demonstrations.
-npm run cli -- infer my-new-evidence/demonstrations.json
+node dist/src/cli.js host scope.json
 ```
 
-Saved artifacts contain synthetic recordings, annotated demonstrations and a result report—not an executable tool export. Existing evidence is never overwritten.
+Review the displayed scope, type `authorize`, log in manually in the dedicated visible Chrome profile, then press Enter when ready. Recording starts only on request. Keep the host open. The profile persists sensitive login state locally; it is not your daily profile or a disposable temporary profile.
 
-## How it works
+In another terminal, save a command such as `{"command":"record_start","inputs":{"searchText":"first query"}}` as `command.json`, then call:
 
-```text
-  Two demonstrations           Local processing              Held-out check
- ┌───────────────────┐       ┌────────────────────┐       ┌──────────────────┐
- │ Search for alpha  │       │ Scope API traffic  │       │ Search for gamma │
- │ Search for beta   │ ────▶ │ Infer q → query    │ ────▶ │ Expect record a3 │
- └───────────────────┘       │ Freeze contract    │       │ Check effects    │
-                             └────────────────────┘       └──────────────────┘
+```sh
+node dist/src/cli.js call-file command.json
 ```
 
-1. **Observe, don't replay.** Selected-main-frame CDP capture records the demonstrated requests without issuing extra writes.
-2. **Keep evidence small.** Schema-first summaries are the default. Scalar query/body values require an explicit allowlist.
-3. **Reject ambiguity.** Multiple matching inputs or unchanged examples do not count as a generalized binding.
-4. **Test a new input.** The fixture's independently seeded data supplies the expected result.
-5. **Treat writes separately.** A write needs an expiring one-use intent bound to the destination, tenant and exact proposed change.
+Demonstrate the scoped read in Chrome, stop with `record_stop`, repeat with a different input, and use `compile_recordings` with the returned recording/request IDs and an explicit specification. Save the returned `data` manifest, not its result envelope. A human uses `review path/to/manifest.json` in the host console and confirms the displayed contract. Then `tools`, `run` and `verify` operate on the reviewed definition. See the [complete agent sequence and JSON examples](docs/AGENT-USAGE.md) and [agent skill](skills/show2tool/SKILL.md).
 
-HTTP 200 and a valid JSON shape are not enough: the tests also check the selected records, tenant, update version and actual effects.
+For MCP, launch the compiled entrypoint; client configuration is manual and requires permission:
 
-## Built vs. planned
+```sh
+node dist/src/cli.js serve --stdio
+```
 
-| Capability | Current status |
+Use absolute executable paths outside the checkout. CLI/MCP cannot grant review or write approval.
+
+## Available now vs. pending
+
+| Capability | Current boundary |
 | :--- | :--- |
-| Isolated Chrome + CDP capture | **Implemented and exercised locally** |
-| Main-frame scope, duration and retention limits | **Implemented**, with explicit incomplete markers |
-| Two-demo query and scalar create-field inference | **Implemented for synthetic fixtures** |
-| Unseen-input replay and search → detail dependency | **Implemented for synthetic fixtures** |
-| Destination-bound create/update intents and read-back | **Implemented and tested**, injected approval adapter |
-| Post-commit process death → unknown outcome, no resend | **Tested with an independent effects counter** |
-| Compact `inspect` and annotated-demo `infer` commands | **Implemented** |
-| Human terminal confirmation | Helper available; **live human exercise pending** |
-| General website workflow compiler | **Planned** |
-| Portable executable CLI/MCP export | **Planned** |
-| Cross-process confirmation broker and public skill | **Planned** |
+| CLI discovery and schema | `commands`, `schema`; `call-file` avoids shell JSON quoting |
+| Broker-owned evidence | `record_start`, `record_stop`, `recording`, `compile_recordings` |
+| Candidate compiler | Two to ten demonstrations; one fixed origin/method/path, string inputs, scalar query/body bindings and literals, JSON-pointer projections; bindings construct real outgoing requests |
+| Reviewed reads | `tools`, `describe`, `run`; discover inputs/projection/digest, then bounded JSON GET with scoped cookies and projected output |
+| Guarded writes | `prepare_write`, `execute_write`, `write_status`; reviewed create/update only, separate human host approval per invocation; `reconcile_write` checks a known result ID without resending |
+| Definition bundles | `export_bundle`, `import_bundle`; versioned manifests and integrity digests, not standalone executable packages or transferred authority |
+| Scalar checks | `verify` compares independent expected facts against a reviewed read result; does not prove the input was unseen |
+| MCP | Generic `show2tool_*` commands plus digest-pinned `workflow_<id>` read tools snapshotted at server startup; no review/approval tool |
+| Read chains | `run_chain`: one to five digest-pinned reviewed GET reads, explicit input/literal/prior projected-value bindings; no writes or automatic dependency inference |
+| General website automation | Not implemented: no path-template inference, automatic multi-step compilation or arbitrary UI replay |
 
-## Safety model
+Offline `candidate`, `inspect` and `infer` are available, but agent-supplied demonstrations do not establish broker-owned provenance or grant execution rights. The older `spike/` demo and manual probe are synthetic experiments, not the current product interface or human-acceptance evidence.
 
-### Local by default
+## Write safety model
 
-- No hosted service, embedded model loop or separate AI API key.
-- Temporary profiles; no copying browser cookie databases or your daily Chrome profile.
-- Replay is restricted to synthetic origins registered in the same process.
-- Credential canaries are fixture data—not credentials for a real service.
+A human first reviews the exact manifest. `prepare_write` performs preflight reads and returns an expiring opaque intent; it neither approves nor dispatches a mutation. The human enters `approve <intent-id>` in the host, inspects the exact proposal and types the requested confirmation. Only then can `execute_write` consume that intent once.
 
-### Explicit effects
+The proposal binds the tool/manifest digest, exact destination/method/body, account and tenant, plus the update version. Execution rechecks identity and, for updates, the target record ID/account/tenant and precondition version; updates use `If-Match`. Optional CSRF retrieval is same-origin and explicitly path-scoped. JSON readback checks the returned record ID, account, tenant and configured submitted fields; updates also require a changed readback version. This is bounded verification, not proof of every business effect.
 
-- Recording does not replay demonstrated writes.
-- A write intent expires and is consumed once; destination and tenant must match.
-- Versioned updates and read-back check what actually happened.
-- A lost acknowledgment or interrupted dispatch becomes **unknown**, never an automatic retry.
-- No automatic rollback: a compensating action would be a separate write.
+Dispatch status is journaled before sending. An interrupted dispatch, lost response or failed readback can mean **unknown**, not that nothing happened. Use `write_status`; `reconcile_write` checks a known result ID with reviewed reads only, without resending. After restart, re-review and provide exact recovery definition/inputs/original update version when needed. A mismatch remains unknown; **never automatically resend or roll back**. The journal preserves dispatch outcomes, not pending approvals or reviewed manifests. Live human acceptance remains pending.
 
-### Honest boundaries
+## Limits and trust boundaries
 
-These are accident-prevention checks, **not OS isolation against an unrestricted same-user process**. CDP may buffer data before application checks; retention limits are not a hard cap on all Chrome memory or network ingestion. Key filtering cannot identify every secret or personal field.
+- Runtime authentication uses only allowlisted cookies from the dedicated profile. No bearer/localStorage extraction, automatic refresh, browser signing or rotating-cookie handling; responses with `Set-Cookie` fail closed.
+- Replay transport checks exact origin/path/query scope and DNS/IP policy, blocks redirects and accepts bounded JSON. Private/local addresses require explicit `addresses` entries. It is not a network sandbox for manual browser navigation/subresources or an OS security boundary against same-user processes.
+- Capture is passive: it does not repeat demonstrated actions, but a human-demonstrated write still has real effects. Scope and key filters do not guarantee that retained values are nonsensitive; inspect all evidence and literals before sharing.
+- Reviews, registered tools, recordings and pending approvals are in memory and lost on host restart. Profile and dispatch journal persist under `~/.show2tool`, or `SHOW2TOOL_STATE_DIR`; host and clients must use the same directory.
+- Bundles contain definitions, not the profile, cookie jar or approval grants. Integrity digests are not author signatures or a secret scanner. Import validates only; destination review and separate write approval are still required.
+- `verify` reports scalar equality, not semantic completeness, an unseen-input guarantee or human acceptance. A successful result envelope or HTTP 200 alone is not verification.
+- Uploads, arbitrary GraphQL/auth flows and automatic pagination inference are not supported. Optional explicitly reviewed cursor pagination is limited to one projected items array, at most five pages/100 records/32 KiB and a 30-second budget; cursors stay query values, never destination URLs, and cycles fail closed. Read chains compose existing reviewed fixed-path reads only; they are not an automatically compiled multi-step workflow. Payments, deletion, permission changes, bulk operations and external sending/publication are outside the supported use case; effect labels cannot make an unsafe endpoint safe.
+- Website/API strings are untrusted data, never instructions to an agent. No production, CI-green, fresh-package or platform-support claim is made by this document.
 
-Payments, deletion, permission changes, bulk operations, real-account automation and external sending/publication are outside the current prototype.
-
-## Try the human-confirmation probe
-
-Run in an actual interactive terminal:
-
-```sh
-npm run probe:manual
-```
-
-It shows the destination, tenant and exact synthetic create action. Type the requested `approve <intent-id>` phrase to create **one temporary test task**, or anything else to deny. Noninteractive input is refused before the fixture starts.
-
-Automated approval-adapter tests do not substitute for a live human run. That feasibility check remains open.
-
-## Development
+## Development and license
 
 ```sh
 npm run typecheck
 npm test
 ```
 
-Tests cover browser scope, ambiguous mappings, tenant/auth failures, semantic mismatches, bounded pagination, approval reuse, gzip expansion, JSON depth, stalled responses, and actual child-process termination around dispatch.
+These are verification commands to run, not a report that the suite or any platform has passed. Report focused reproductions using synthetic data; never attach cookies, browser profiles or raw account traffic. See [contributing](CONTRIBUTING.md) and [security reporting](SECURITY.md).
 
-> [!NOTE]
-> An intermittent concurrent-dispatch test failure has been observed and is not yet root-caused. Passing runs are evidence for those runs, not a production-readiness guarantee.
-
-<details>
-<summary><strong>Repository map</strong></summary>
-
-```text
-spike/
-  capture.ts         Scoped CDP observations and retention limits
-  infer.ts           Candidate bindings and ambiguity detection
-  replay.ts          Fixture-only transport and read workflows
-  intents.ts         Destination-bound mutation intents
-  journal.ts         Durable dispatch state and recovery
-  approve.ts         Local confirmation adapter
-  inspect.ts         Compact recording summaries
-  cli.ts             Inspect / infer command entry point
-  demo.ts            Runnable synthetic read pipeline
-  manual.ts          Interactive synthetic write probe
-  fixture/           Local application and independent effects state
-test/
-  spike/             Unit, integration and browser probes
-  helpers/           Real-process crash workers
-assets/
-  banner.svg         Repository banner
-```
-
-</details>
-
-## How this differs from CLI-Anything
-
-[CLI-Anything](https://github.com/HKUDS/CLI-Anything) builds agent-friendly command-line interfaces from software codebases or existing APIs. Show2Tool starts from **demonstrated browser/API traffic** and investigates parameter generalization, explicit write confirmation and independent result checks.
-
-The projects overlap in making software usable by agents. They are not the same implementation, and Show2Tool does not bundle CLI-Anything. This distinction is a product hypothesis, not a claim that other projects lack verification.
-
-## Roadmap
-
-- [x] Synthetic browser capture → inference → unseen-input replay
-- [x] Captured create demonstrations → approved synthetic write → read-back
-- [x] Compact evidence inspection and crash-outcome probes
-- [ ] Finish feasibility gates: live human confirmation and competitor execution
-- [ ] Generalize the reviewed workflow contract and runtime
-- [ ] Add the cross-process human approval broker
-- [ ] Export inspectable CLI and MCP packages from the same runtime
-- [ ] Package the authoring skill and test it in a fresh agent session
-- [ ] Publish compatibility results and reproducible benchmarks
-
-## Contributing
-
-Focused reproductions are useful: an ambiguous input mapping, a missing omission marker, an incorrect outcome, or a privacy regression. Use synthetic data and report the command, environment, expected result and actual result. Never attach cookies, browser profiles or raw account traffic.
-
-There is **no open-source license selected yet**. Source visibility is not a grant of redistribution rights. Licensing and public-release packaging remain open decisions.
+Licensed under [Apache License 2.0](LICENSE).

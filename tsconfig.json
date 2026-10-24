@@ -7,7 +7,16 @@
     "noEmit": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "types": ["node", "vitest/globals"]
+    "types": [
+      "node",
+      "vitest/globals"
+    ]
   },
-  "include": ["spike/**/*.ts", "test/**/*.ts", "vitest.config.ts"]
+  "include": [
+    "spike/**/*.ts",
+    "test/**/*.ts",
+    "vitest.config.ts",
+    "src/**/*.ts",
+    "examples/**/*.ts"
+  ]
 }

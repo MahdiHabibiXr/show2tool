@@ -1,3 +1,4 @@
+import { chromePath } from '../../src/browser/chrome.js';
 import { it, expect } from 'vitest';
 import { chromium } from 'playwright';
 import { mkdtemp, rm } from 'node:fs/promises';
@@ -78,7 +79,7 @@ it('attaches through CDP to an owned dedicated Chrome instance', async () => {
   const { readFile } = await import('node:fs/promises');
   const app = await startFixture();
   const profile = await mkdtemp(join(tmpdir(), 'show2tool-cdp-'));
-  const chrome = spawn('C:/Program Files/Google/Chrome/Application/chrome.exe', ['--headless=new', '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', `--user-data-dir=${profile}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
+  const chrome = spawn(chromePath(), ['--headless=new', '--remote-debugging-port=0', '--remote-debugging-address=127.0.0.1', `--user-data-dir=${profile}`, '--no-first-run', 'about:blank'], { stdio: 'ignore' });
   let attached: Awaited<ReturnType<typeof chromium.connectOverCDP>> | undefined;
   try {
     let port = '';
